@@ -1,235 +1,164 @@
 #!/usr/bin/env python3
 """
 BuildSwift Lead Finder
-Analyzes a website URL and generates a lead report + email draft.
-Usage: python3 lead_finder.py https://example.com
-       python3 lead_finder.py --batch urls.txt
+Finds local businesses with bad/no websites for outreach.
+Usage: python lead_finder.py "plumbers in Chicago" --count 20
+Output: CSV + JSON files in leads/ directory
 """
 
-import sys
-import json
-import re
-import argparse
+import json, csv, os, sys, re, time, argparse
 from datetime import datetime
 from pathlib import Path
 
 LEADS_DIR = Path(__file__).parent / "leads"
 LEADS_DIR.mkdir(exist_ok=True)
 
+def extract_emails_from_text(text):
+    """Extract email addresses from text."""
+    pattern = r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}'
+    return list(set(re.findall(pattern, text)))
 
-def analyze_website(url):
-    """Analyze a website for quality issues and extract contact info."""
-    import requests
+def extract_domain(url):
+    """Extract domain from URL."""
+    if not url:
+        return ""
+    url = url.replace("https://", "").replace("http://", "").split("/")[0]
+    return url
 
-    if not url.startswith('http'):
-        url = 'https://' + url
-
-    score = 0
+def score_website_quality(url, title="", snippet=""):
+    """Score a business's web presence (lower = worse = better lead)."""
+    score = 50  # neutral
     issues = []
-    try:
-        resp = requests.get(url, timeout=10, headers={
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-        }, allow_redirects=True)
-        html = resp.text
-        html_lower = html.lower()
 
-        # Mobile
-        if '<meta name="viewport"' not in html_lower:
-            score += 3; issues.append("❌ Not mobile responsive")
+    if not url or url == "":
+        score = 0
+        issues.append("No website found")
+        return score, issues
 
-        # HTTPS
-        if resp.url.startswith('http://'):
-            score += 2; issues.append("❌ No HTTPS (insecure)")
+    domain = extract_domain(url)
 
-        # Ancient patterns
-        if '<table' in html_lower and html_lower.count('<table') > 3:
-            score += 3; issues.append("❌ Table-based layout (very outdated)")
-        if '<marquee' in html_lower:
-            score += 4; issues.append("❌ Uses <marquee> (ancient)")
-        if '<frame' in html_lower or '<frameset' in html_lower:
-            score += 5; issues.append("❌ Uses frames")
-        if 'flash' in html_lower and ('.swf' in html_lower or 'swfobject' in html_lower):
-            score += 5; issues.append("❌ Uses Flash")
-        if 'comic sans' in html_lower or 'papyrus' in html_lower:
-            score += 3; issues.append("❌ Comic Sans / Papyrus font")
+    # Red flags for bad sites
+    if any(x in domain for x in ['wix.com', 'weebly.com', 'godaddy.com', 'squarespace.com']):
+        score -= 15
+        issues.append("Using basic website builder")
+    if any(x in domain for x in ['facebook.com', 'yelp.com', 'yellowpages.com']):
+        score -= 25
+        issues.append("No real website — using social/directory page")
+    if 'wordpress.com' in domain:  # .com = free hosted
+        score -= 10
+        issues.append("Free WordPress.com site")
 
-        # Old copyright
-        for m in re.finditer(r'(?:©|copyright)\s*(\d{4})', html_lower):
-            yr = int(m.group(1))
-            if yr < 2022:
-                score += 2; issues.append(f"❌ Copyright year: {yr}")
-                break
+    # Snippet analysis
+    snippet_lower = (snippet or "").lower()
+    if any(x in snippet_lower for x in ['under construction', 'coming soon', 'parked']):
+        score -= 30
+        issues.append("Site under construction or parked")
+    if any(x in snippet_lower for x in ['flash', 'silverlight']):
+        score -= 25
+        issues.append("Uses outdated technology")
 
-        # Speed (page size as proxy)
-        if len(html) > 500_000:
-            score += 1; issues.append("⚠️ Very heavy page (slow load)")
+    if not issues:
+        issues.append("Has a website — may need review")
 
-        # Under construction
-        if 'under construction' in html_lower or 'coming soon' in html_lower:
-            score += 2; issues.append("❌ Under construction / coming soon")
-
-        # Builder detection
-        for builder, name in [('wix.com', 'Wix'), ('squarespace', 'Squarespace'), ('weebly', 'Weebly')]:
-            if builder in html_lower:
-                issues.append(f"ℹ️ Built on {name}")
-
-        # WordPress detection
-        if 'wp-content' in html_lower:
-            issues.append("ℹ️ WordPress site")
-            # Check for default theme
-            if 'flavor' not in html_lower and ('twentytwenty' in html_lower or 'flavor' in html_lower):
-                score += 1; issues.append("⚠️ Default WordPress theme")
-
-        # Extract contacts
-        emails = list(set(re.findall(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}', html)))
-        phones = list(set(re.findall(r'\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}', html)))
-
-        # Title
-        title_m = re.search(r'<title[^>]*>(.*?)</title>', html, re.I | re.DOTALL)
-        title = title_m.group(1).strip()[:120] if title_m else url
-
-        # Meta description
-        desc_m = re.search(r'<meta\s+name=["\']description["\']\s+content=["\'](.*?)["\']', html, re.I)
-        description = desc_m.group(1).strip()[:200] if desc_m else ""
-
-        return {
-            "url": resp.url,
-            "title": title,
-            "description": description,
-            "score": min(score, 10),
-            "issues": issues,
-            "emails": emails[:5],
-            "phones": phones[:5],
-            "status": resp.status_code,
-            "mobile_friendly": '<meta name="viewport"' in html_lower,
-            "https": resp.url.startswith('https'),
-            "page_size_kb": round(len(html) / 1024),
-        }
-
-    except Exception as e:
-        return {
-            "url": url,
-            "title": "Error",
-            "description": "",
-            "score": 2,
-            "issues": [f"❌ Site unreachable: {str(e)[:80]}"],
-            "emails": [],
-            "phones": [],
-            "status": 0,
-            "mobile_friendly": False,
-            "https": False,
-            "page_size_kb": 0,
-        }
+    return max(0, min(100, score)), issues
 
 
-def generate_email_draft(lead):
-    """Generate a cold outreach email draft based on the lead analysis."""
-    biz = lead['title'].split('|')[0].split('-')[0].split('—')[0].strip()
-    if len(biz) > 40 or biz == lead['url']:
-        biz = "your business"
-
-    pain_points = [i for i in lead['issues'] if i.startswith('❌')]
-    
-    if not pain_points:
-        hook = "I noticed your website could use a refresh"
-    elif len(pain_points) == 1:
-        hook = f"I noticed {pain_points[0].replace('❌ ', '').lower()} on your website"
-    else:
-        hook = f"I found {len(pain_points)} issues with your current website that are likely costing you customers"
-
-    email = f"""Subject: Quick question about {biz}'s website
-
-Hi,
-
-{hook}. I specialize in rebuilding websites for local businesses — fast, affordable, and designed to actually bring in customers.
-
-Here's what I found:
-"""
-    for issue in pain_points[:3]:
-        email += f"  • {issue.replace('❌ ', '')}\n"
-
-    if not lead['mobile_friendly']:
-        email += "\nOver 60% of your potential customers are searching on their phones. If your site doesn't work on mobile, you're invisible to them.\n"
-
-    email += f"""
-We can have a modern, mobile-friendly website live for {biz} within 48 hours — starting at $0 down, $20/month (everything included).
-
-Take a look at what we do: https://buildswift.co
-
-Would you be open to a free site analysis? No obligation — just a quick report on what's working and what's not.
-
-Best,
-Cole Ashford
-BuildSwift
-CAshford@buildswift.co
-"""
-    return email.strip()
+def format_lead_row(lead):
+    """Format a lead for display."""
+    score_bar = "🔴" if lead['score'] < 20 else "🟡" if lead['score'] < 40 else "🟢"
+    return f"{score_bar} {lead['business']} | {lead['url'] or 'NO SITE'} | Score: {lead['score']}/100 | {', '.join(lead['issues'])}"
 
 
-def format_report(lead):
-    """Format a single lead into a readable report."""
-    stars = '🔥' * min(lead['score'], 5)
-    lines = [
-        f"{'='*60}",
-        f"LEAD REPORT: {lead['title']}",
-        f"{'='*60}",
-        f"URL:      {lead['url']}",
-        f"Score:    {stars} ({lead['score']}/10)",
-        f"Mobile:   {'✅ Yes' if lead['mobile_friendly'] else '❌ NO'}",
-        f"HTTPS:    {'✅ Yes' if lead['https'] else '❌ NO'}",
-        f"Size:     {lead['page_size_kb']} KB",
-    ]
-    if lead['emails']:
-        lines.append(f"Emails:   {', '.join(lead['emails'])}")
-    if lead['phones']:
-        lines.append(f"Phones:   {', '.join(lead['phones'])}")
-    if lead['issues']:
-        lines.append(f"\nIssues found:")
-        for issue in lead['issues']:
-            lines.append(f"  {issue}")
-    
-    lines.append(f"\n--- EMAIL DRAFT ---\n")
-    lines.append(generate_email_draft(lead))
-    lines.append("")
-    return '\n'.join(lines)
+def save_leads(leads, query):
+    """Save leads to CSV and JSON."""
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    slug = re.sub(r'[^a-z0-9]+', '_', query.lower()).strip('_')
+
+    csv_path = LEADS_DIR / f"{slug}_{ts}.csv"
+    json_path = LEADS_DIR / f"{slug}_{ts}.json"
+
+    # CSV
+    with open(csv_path, 'w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=['business', 'url', 'domain', 'email', 'location', 'industry', 'score', 'issues', 'snippet'])
+        writer.writeheader()
+        for lead in leads:
+            row = {**lead, 'issues': '; '.join(lead['issues']), 'email': '; '.join(lead.get('emails', []))}
+            writer.writerow(row)
+
+    # JSON
+    with open(json_path, 'w') as f:
+        json.dump({'query': query, 'timestamp': ts, 'count': len(leads), 'leads': leads}, f, indent=2)
+
+    return csv_path, json_path
 
 
-def main():
-    parser = argparse.ArgumentParser(description='BuildSwift Lead Analyzer')
-    parser.add_argument('url', nargs='?', help='Website URL to analyze')
-    parser.add_argument('--batch', '-b', help='File with URLs (one per line)')
-    parser.add_argument('--json', action='store_true', help='JSON output')
-    
-    args = parser.parse_args()
-    
-    urls = []
-    if args.batch:
-        urls = [l.strip() for l in Path(args.batch).read_text().splitlines() if l.strip()]
-    elif args.url:
-        urls = [args.url]
-    else:
-        parser.print_help()
-        return
+def print_leads_table(leads):
+    """Print leads in a readable format."""
+    print("\n" + "="*80)
+    print(f"  Found {len(leads)} leads — sorted by opportunity (worst site = best lead)")
+    print("="*80)
 
-    results = []
-    for url in urls:
-        print(f"Analyzing {url}...", file=sys.stderr)
-        lead = analyze_website(url)
-        lead['email_draft'] = generate_email_draft(lead)
-        results.append(lead)
+    for i, lead in enumerate(leads, 1):
+        score = lead['score']
+        icon = "🔴" if score < 20 else "🟡" if score < 40 else "🟢"
+        print(f"\n{i}. {icon} {lead['business']}")
+        print(f"   URL: {lead['url'] or 'NO WEBSITE'}")
+        if lead.get('emails'):
+            print(f"   Email: {', '.join(lead['emails'])}")
+        if lead.get('location'):
+            print(f"   Location: {lead['location']}")
+        print(f"   Score: {score}/100 — {', '.join(lead['issues'])}")
+        if lead.get('snippet'):
+            print(f"   Snippet: {lead['snippet'][:120]}...")
 
-    if args.json:
-        print(json.dumps(results, indent=2))
-    else:
-        for lead in results:
-            print(format_report(lead))
-
-    # Auto-save
-    ts = datetime.now().strftime('%Y%m%d-%H%M')
-    out = LEADS_DIR / f"analysis-{ts}.json"
-    out.write_text(json.dumps(results, indent=2))
-    print(f"\n📁 Saved: {out}", file=sys.stderr)
+    print("\n" + "="*80)
+    hot = [l for l in leads if l['score'] < 25]
+    warm = [l for l in leads if 25 <= l['score'] < 45]
+    print(f"  🔴 Hot leads (score <25): {len(hot)}")
+    print(f"  🟡 Warm leads (score 25-44): {len(warm)}")
+    print(f"  🟢 Others: {len(leads) - len(hot) - len(warm)}")
+    print("="*80)
 
 
+# Main entry — designed to be called by agents via exec
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Find local business leads with bad websites")
+    parser.add_argument("query", help='Search query, e.g. "plumbers in Chicago"')
+    parser.add_argument("--count", type=int, default=10, help="Number of results to find")
+    parser.add_argument("--output", choices=["table", "json", "csv"], default="table")
+    args = parser.parse_args()
+
+    print(f"\n🔍 Searching: {args.query}")
+    print("   (Use with OpenClaw web_search tool for best results)")
+    print(f"   Run: Reese or Silas should call web_search('{args.query} website') and pipe results through this scorer.\n")
+
+    # This script provides the scoring/formatting framework.
+    # Actual search should be done via web_search tool, then results fed in.
+    # For standalone use, it reads from stdin (JSON array of {title, url, snippet}).
+
+    if not sys.stdin.isatty():
+        data = json.load(sys.stdin)
+        leads = []
+        for item in data:
+            score, issues = score_website_quality(item.get('url', ''), item.get('title', ''), item.get('snippet', ''))
+            leads.append({
+                'business': item.get('title', 'Unknown'),
+                'url': item.get('url', ''),
+                'domain': extract_domain(item.get('url', '')),
+                'emails': extract_emails_from_text(item.get('snippet', '') + ' ' + item.get('title', '')),
+                'location': item.get('location', ''),
+                'industry': '',
+                'score': score,
+                'issues': issues,
+                'snippet': item.get('snippet', '')
+            })
+
+        leads.sort(key=lambda x: x['score'])
+        print_leads_table(leads)
+        csv_path, json_path = save_leads(leads, args.query)
+        print(f"\n📁 Saved: {csv_path}")
+        print(f"📁 Saved: {json_path}")
+    else:
+        print("💡 Tip: Pipe search results as JSON to score them:")
+        print(f'   echo \'[{{"title":"Biz","url":"http://example.com","snippet":"old site"}}]\' | python {__file__} "{args.query}"')
+        print(f"\n   Or have Reese/Silas use web_search + this tool together.")
