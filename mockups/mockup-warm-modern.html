@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chesapeake Urology — Warm Modern</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'DM Sans', sans-serif; color: #2d3436; background: #faf9f6; }
+h1, h2, h3 { font-family: 'DM Serif Display', serif; }
+
+nav { padding: 24px 60px; display: flex; justify-content: space-between; align-items: center; background: #faf9f6; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
+.logo { font-family: 'DM Serif Display', serif; font-size: 24px; color: #5a7247; }
+nav ul { list-style: none; display: flex; gap: 28px; align-items: center; }
+nav a { text-decoration: none; color: #666; font-size: 14px; font-weight: 500; }
+nav a:hover { color: #5a7247; }
+.nav-book { background: #5a7247; color: #fff !important; padding: 10px 24px; border-radius: 24px; font-weight: 600; }
+.nav-book:hover { background: #4a6039; }
+
+/* Hero */
+.hero { display: grid; grid-template-columns: 1fr 1fr; min-height: 80vh; align-items: center; padding: 40px 60px; gap: 60px; }
+.hero-text h1 { font-size: 48px; line-height: 1.2; color: #2d3436; margin-bottom: 20px; }
+.hero-text h1 em { color: #5a7247; font-style: normal; }
+.hero-text p { font-size: 17px; line-height: 1.8; color: #777; margin-bottom: 36px; }
+.hero-actions { display: flex; gap: 16px; align-items: center; }
+.btn-warm { background: #5a7247; color: #fff; padding: 16px 36px; border: none; border-radius: 32px; font-size: 15px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.3s; display: inline-block; }
+.btn-warm:hover { background: #4a6039; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(90,114,71,0.3); }
+.btn-ghost { color: #5a7247; font-weight: 600; font-size: 15px; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+.hero-img { background: url('https://images.unsplash.com/photo-1666214280557-091e3a643647?w=800') center/cover; border-radius: 24px; height: 500px; position: relative; }
+.hero-img::after { content: ''; position: absolute; inset: 0; border-radius: 24px; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05); }
+.hero-stats { display: flex; gap: 32px; margin-top: 40px; padding-top: 32px; border-top: 1px solid #e8e4dc; }
+.stat { text-align: center; }
+.stat .val { font-family: 'DM Serif Display', serif; font-size: 32px; color: #5a7247; }
+.stat .lbl { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px; }
+
+/* Sections */
+section { padding: 100px 60px; }
+.centered { text-align: center; }
+.section-head { font-size: 36px; color: #2d3436; margin-bottom: 12px; }
+.section-desc { font-size: 15px; color: #999; max-width: 500px; margin: 0 auto 56px; line-height: 1.7; }
+
+/* Services */
+.services-wrap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1100px; margin: 0 auto; }
+.svc { background: #fff; padding: 36px; border-radius: 20px; border: 1px solid #ece8e0; transition: all 0.3s; }
+.svc:hover { border-color: #5a7247; box-shadow: 0 8px 32px rgba(90,114,71,0.08); transform: translateY(-3px); }
+.svc-icon { width: 52px; height: 52px; background: #eef3ea; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px; }
+.svc h3 { font-size: 19px; margin-bottom: 10px; color: #2d3436; }
+.svc p { font-size: 13px; color: #888; line-height: 1.8; }
+
+/* Doctors */
+.docs-section { background: #f3f0ea; border-radius: 32px; margin: 0 40px; padding: 80px 60px; }
+.docs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+.doc { text-align: center; }
+.doc-avatar { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, #d4dbc8, #eef3ea); margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; font-size: 40px; border: 3px solid #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+.doc h3 { font-size: 15px; color: #2d3436; margin-bottom: 4px; }
+.doc .spec { font-size: 12px; color: #5a7247; font-weight: 500; }
+.doc .loc { font-size: 11px; color: #aaa; margin-top: 4px; }
+
+/* Locations */
+.loc-banner { background: #5a7247; color: #fff; border-radius: 24px; padding: 60px; text-align: center; max-width: 1000px; margin: 0 auto; }
+.loc-banner h2 { font-size: 34px; color: #fff; margin-bottom: 12px; }
+.loc-banner p { opacity: 0.8; margin-bottom: 28px; font-size: 15px; }
+.state-tags { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
+.state-tag { background: rgba(255,255,255,0.15); padding: 8px 18px; border-radius: 20px; font-size: 13px; }
+
+/* Testimonials */
+.test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1100px; margin: 0 auto; }
+.test { background: #fff; padding: 32px; border-radius: 20px; border: 1px solid #ece8e0; }
+.test .stars { color: #c8a95e; font-size: 14px; margin-bottom: 12px; }
+.test blockquote { font-size: 14px; color: #666; line-height: 1.8; font-style: italic; margin-bottom: 16px; }
+.test .who { font-weight: 600; font-size: 13px; color: #2d3436; }
+.test .where { font-size: 11px; color: #bbb; }
+
+/* Insurance */
+.ins-row { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; margin-top: 36px; }
+.ins-badge { padding: 14px 28px; background: #fff; border: 1px solid #e8e4dc; border-radius: 12px; font-size: 14px; font-weight: 600; color: #999; }
+
+/* Footer */
+footer { background: #2d3436; color: #fff; padding: 60px; margin-top: 40px; }
+.foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; max-width: 1100px; margin: 0 auto 36px; }
+footer h4 { font-family: 'DM Serif Display', serif; margin-bottom: 16px; font-size: 16px; }
+footer a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13px; display: block; margin-bottom: 8px; }
+footer a:hover { color: #fff; }
+.foot-copy { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; font-size: 12px; color: rgba(255,255,255,0.4); text-align: center; max-width: 1100px; margin: 0 auto; }
+
+@media (max-width: 768px) {
+  .hero { grid-template-columns: 1fr; padding: 24px; }
+  .hero-img { height: 300px; }
+  nav { padding: 16px 24px; }
+  nav ul { display: none; }
+  section { padding: 60px 24px; }
+  .services-wrap, .docs-grid, .test-grid { grid-template-columns: 1fr; }
+  .foot-grid { grid-template-columns: 1fr; }
+  .docs-section { margin: 0; border-radius: 0; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Chesapeake Urology</div>
+  <ul>
+    <li><a href="#">Services</a></li>
+    <li><a href="#">Doctors</a></li>
+    <li><a href="#">Locations</a></li>
+    <li><a href="#">Patients</a></li>
+    <li><a href="#" class="nav-book">Book Now</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>Your health deserves <em>personal attention</em></h1>
+    <p>At Chesapeake Urology, we believe great care starts with listening. Our team of specialists provides compassionate, personalized urological care across 83 locations nationwide.</p>
+    <div class="hero-actions">
+      <a href="#" class="btn-warm">Schedule a Visit</a>
+      <a href="#" class="btn-ghost">Find a Doctor →</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="val">83</div><div class="lbl">Locations</div></div>
+      <div class="stat"><div class="val">1,600+</div><div class="lbl">Team Members</div></div>
+      <div class="stat"><div class="val">5</div><div class="lbl">States</div></div>
+    </div>
+  </div>
+  <div class="hero-img"></div>
+</section>
+
+<section class="centered">
+  <h2 class="section-head">How We Can Help</h2>
+  <p class="section-desc">From routine checkups to advanced surgical care, our specialists are here for every step of your journey.</p>
+  <div class="services-wrap">
+    <div class="svc"><div class="svc-icon">🩺</div><h3>General Urology</h3><p>Comprehensive care for kidney stones, UTIs, bladder conditions, and routine urological health.</p></div>
+    <div class="svc"><div class="svc-icon">🎗️</div><h3>Cancer Care</h3><p>Expert oncology teams treating prostate, bladder, kidney, and testicular cancers with advanced protocols.</p></div>
+    <div class="svc"><div class="svc-icon">🤖</div><h3>Robotic Surgery</h3><p>Minimally invasive robotic procedures for faster recovery, less pain, and better outcomes.</p></div>
+    <div class="svc"><div class="svc-icon">💜</div><h3>Women's Health</h3><p>Specialized pelvic floor care, incontinence treatment, and urological wellness for women.</p></div>
+    <div class="svc"><div class="svc-icon">🧸</div><h3>Pediatric Care</h3><p>Gentle, expert urological care for children of all ages in a family-friendly environment.</p></div>
+    <div class="svc"><div class="svc-icon">🔬</div><h3>Research & Trials</h3><p>Access to cutting-edge clinical trials and emerging treatments not yet widely available.</p></div>
+  </div>
+</section>
+
+<div class="docs-section">
+  <div class="centered">
+    <h2 class="section-head">Doctors Who Care</h2>
+    <p class="section-desc">Board-certified urologists who take the time to understand your needs and develop a personalized care plan.</p>
+  </div>
+  <div class="docs-grid">
+    <div class="doc"><div class="doc-avatar">👨‍⚕️</div><h3>Dr. James Mitchell</h3><div class="spec">Urologic Oncology</div><div class="loc">Annapolis, MD</div></div>
+    <div class="doc"><div class="doc-avatar">👩‍⚕️</div><h3>Dr. Sarah Chen</h3><div class="spec">Women's Urology</div><div class="loc">Phoenix, AZ</div></div>
+    <div class="doc"><div class="doc-avatar">👨‍⚕️</div><h3>Dr. Robert Patel</h3><div class="spec">Robotic Surgery</div><div class="loc">Denver, CO</div></div>
+    <div class="doc"><div class="doc-avatar">👩‍⚕️</div><h3>Dr. Lisa Nakamura</h3><div class="spec">Pediatric Urology</div><div class="loc">Columbia, MD</div></div>
+  </div>
+</div>
+
+<section>
+  <div class="loc-banner">
+    <h2>Care Close to Home</h2>
+    <p>With 83 locations across 5 states, expert urological care is always within reach.</p>
+    <div class="state-tags">
+      <span class="state-tag">🦀 Maryland</span>
+      <span class="state-tag">🌵 Arizona</span>
+      <span class="state-tag">🏔️ Colorado</span>
+      <span class="state-tag">🏖️ Delaware</span>
+      <span class="state-tag">🎸 Tennessee</span>
+    </div>
+    <a href="#" class="btn-warm" style="background: #fff; color: #5a7247;">Find Your Location</a>
+  </div>
+</section>
+
+<section class="centered">
+  <h2 class="section-head">What Our Patients Say</h2>
+  <p class="section-desc">Real stories from real patients who chose Chesapeake Urology.</p>
+  <div class="test-grid">
+    <div class="test">
+      <div class="stars">★★★★★</div>
+      <blockquote>"I was so nervous, but the entire team made me feel at ease from the moment I walked in. The doctor took time to answer all my questions. Truly outstanding care."</blockquote>
+      <div class="who">Michael R.</div><div class="where">Annapolis, MD</div>
+    </div>
+    <div class="test">
+      <div class="stars">★★★★★</div>
+      <blockquote>"Booking online was a breeze. The office was warm and welcoming — not like a typical doctor's office at all. Dr. Chen was incredibly thorough and compassionate."</blockquote>
+      <div class="who">Jennifer T.</div><div class="where">Scottsdale, AZ</div>
+    </div>
+    <div class="test">
+      <div class="stars">★★★★★</div>
+      <blockquote>"After my robotic surgery, I was back to work in just a week. The team at Colorado Urology is world-class. I can't recommend them enough."</blockquote>
+      <div class="who">David K.</div><div class="where">Boulder, CO</div>
+    </div>
+  </div>
+</section>
+
+<section class="centered">
+  <h2 class="section-head">Insurance & New Patients</h2>
+  <p class="section-desc">We welcome new patients and accept most major insurance plans.</p>
+  <div class="ins-row">
+    <div class="ins-badge">Aetna</div>
+    <div class="ins-badge">BlueCross BlueShield</div>
+    <div class="ins-badge">Cigna</div>
+    <div class="ins-badge">UnitedHealthcare</div>
+    <div class="ins-badge">Medicare</div>
+    <div class="ins-badge">Humana</div>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-grid">
+    <div>
+      <h4>Chesapeake Urology</h4>
+      <p style="font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.7;">Part of United Urology Group. Compassionate, patient-first urological care across the nation.</p>
+    </div>
+    <div><h4>Services</h4><a href="#">General Urology</a><a href="#">Cancer Care</a><a href="#">Robotic Surgery</a><a href="#">Women's Health</a><a href="#">Pediatric Care</a></div>
+    <div><h4>Patients</h4><a href="#">Book Appointment</a><a href="#">Find a Doctor</a><a href="#">Patient Portal</a><a href="#">Insurance</a><a href="#">Forms</a></div>
+    <div><h4>Contact</h4><a href="#">443-231-1500</a><a href="#">info@chesapeakeurology.com</a><a href="#">Careers</a></div>
+  </div>
+  <div class="foot-copy">© 2026 Chesapeake Urology · United Urology Group · Privacy Policy · Terms · HIPAA</div>
+</footer>
+
+</body>
+</html>

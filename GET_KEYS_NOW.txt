@@ -1,0 +1,47 @@
+STRIPE API KEYS - GET THEM NOW
+================================
+
+You have Stripe dashboard open in browser. Just need to copy 2 things:
+
+STEP 1: Make sure you're in TEST MODE
+- Look at top of Stripe dashboard
+- You should see toggle: "Viewing test data"
+- Toggle should be ON (enabled)
+
+STEP 2: Go to API Keys page
+- Click your account name (top right)
+- Click "Developers" 
+- Click "API Keys"
+
+Or just go to: https://dashboard.stripe.com/apikeys
+
+STEP 3: Copy these 2 values exactly as shown
+
+You'll see a section labeled "Standard keys" or "API Keys"
+
+PUBLISHABLE KEY:
+- Look for: "Publishable key"
+- Should start with: pk_test_
+- Click the copy button or select the entire value
+- PASTE IT BELOW:
+
+[ Paste pk_test_... here ]
+
+SECRET KEY:
+- Look for: "Secret key"  
+- Should start with: sk_test_
+- Click "Reveal" if hidden
+- Click the copy button or select the entire value
+- PASTE IT BELOW:
+
+[ Paste sk_test_... here ]
+
+That's it! Just copy those 2 values and paste them.
+
+Once you give me those, I can:
+1. Save to .env
+2. Set up webhook
+3. Test the full payment flow
+4. Verify everything works
+
+Takes 30 seconds total.
