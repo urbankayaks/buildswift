@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuildSwift — Professional Websites, Built Fast</title>
+    <meta name="description" content="Get a stunning, modern website built in 48 hours. No templates. No hassle. Just results.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B00;
+            --primary-dark: #E05E00;
+            --dark: #0A0A0A;
+            --gray-900: #111111;
+            --gray-800: #1A1A1A;
+            --gray-700: #2A2A2A;
+            --gray-400: #888888;
+            --gray-300: #AAAAAA;
+            --white: #FFFFFF;
+            --accent: #FF6B00;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark);
+            color: var(--white);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* NAV */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            padding: 1.25rem 2rem;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+        .logo span { color: var(--primary); }
+        .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .nav-links a {
+            color: var(--gray-300);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--white); }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.85rem 1.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 30px rgba(255, 107, 0, 0.3);
+        }
+        .btn-outline {
+            background: transparent;
+            color: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-outline:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .btn-large {
+            padding: 1rem 2.25rem;
+            font-size: 1.05rem;
+            border-radius: 10px;
+        }
+
+        /* HERO */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8rem 2rem 4rem;
+            position: relative;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(255, 107, 0, 0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .hero-content { max-width: 800px; position: relative; z-index: 1; }
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 107, 0, 0.1);
+            border: 1px solid rgba(255, 107, 0, 0.2);
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+        }
+        .hero h1 em {
+            font-style: normal;
+            background: linear-gradient(135deg, var(--primary), #FF9A44);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--gray-400);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+        }
+        .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+        /* STATS BAR */
+        .stats {
+            padding: 3rem 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .stats-inner {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            flex-wrap: wrap;
+        }
+        .stat { text-align: center; }
+        .stat-num {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.03em;
+        }
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--gray-400);
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+
+        /* SECTIONS */
+        section { padding: 6rem 2rem; }
+        .section-inner { max-width: 1100px; margin: 0 auto; }
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+        }
+        .section-header p {
+            font-size: 1.1rem;
+            color: var(--gray-400);
+            max-width: 550px;
+            margin: 0 auto;
+        }
+
+        /* HOW IT WORKS */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+        .step {
+            background: var(--gray-900);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            position: relative;
+        }
+        .step-num {
+            font-size: 3rem;
+            font-weight: 900;
+            color: rgba(255, 107, 0, 0.15);
+            margin-bottom: 1rem;
+        }
+        .step h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        .step p {
+            color: var(--gray-400);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* PRICING */
+        .pricing-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .pricing-card {
+            background: var(--gray-900);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 3rem 2.5rem;
+        }
+        .pricing-card.featured {
+            border-color: var(--primary);
+            position: relative;
+        }
+        .pricing-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.3rem 1rem;
+            border-radius: 100px;
+            letter-spacing: 0.05em;
+        }
+        .pricing-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .pricing-card .price {
+            font-size: 3rem;
+            font-weight: 900;
+            margin: 1rem 0;
+            letter-spacing: -0.03em;
+        }
+        .pricing-card .price span {
+            font-size: 1rem;
+            color: var(--gray-400);
+            font-weight: 500;
+        }
+        .pricing-card .desc {
+            color: var(--gray-400);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .pricing-card ul {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+        .pricing-card li {
+            padding: 0.5rem 0;
+            font-size: 0.9rem;
+            color: var(--gray-300);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .pricing-card li::before {
+            content: '✓';
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .pricing-card .btn { width: 100%; justify-content: center; }
+
+        /* INDUSTRIES */
+        .industries-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        .industry-card {
+            background: var(--gray-900);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .industry-card:hover {
+            border-color: rgba(255, 107, 0, 0.3);
+            transform: translateY(-2px);
+        }
+        .industry-icon { font-size: 2.5rem; margin-bottom: 1rem; }
+        .industry-card h4 { font-size: 1rem; font-weight: 600; }
+
+        /* BEFORE/AFTER */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .comp-card {
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+        }
+        .comp-card.before {
+            background: rgba(255, 50, 50, 0.05);
+            border: 1px solid rgba(255, 50, 50, 0.15);
+        }
+        .comp-card.after {
+            background: rgba(0, 200, 100, 0.05);
+            border: 1px solid rgba(0, 200, 100, 0.15);
+        }
+        .comp-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        .comp-card.before h3 { color: #FF5555; }
+        .comp-card.after h3 { color: #00C864; }
+        .comp-card li {
+            padding: 0.4rem 0;
+            color: var(--gray-400);
+            font-size: 0.9rem;
+            list-style: none;
+        }
+
+        /* CTA */
+        .cta-section {
+            text-align: center;
+            padding: 6rem 2rem;
+            position: relative;
+        }
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 107, 0, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .cta-section h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            letter-spacing: -0.03em;
+        }
+        .cta-section p {
+            font-size: 1.1rem;
+            color: var(--gray-400);
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* FORM */
+        .audit-form {
+            max-width: 500px;
+            margin: 3rem auto 0;
+            background: var(--gray-900);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 2.5rem;
+        }
+        .audit-form h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .audit-form > p {
+            color: var(--gray-400);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: var(--gray-800);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--white);
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary);
+        }
+        .form-group input::placeholder { color: var(--gray-400); }
+
+        /* FOOTER */
+        footer {
+            padding: 3rem 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            text-align: center;
+        }
+        footer p {
+            color: var(--gray-400);
+            font-size: 0.8rem;
+        }
+        footer a { color: var(--gray-400); text-decoration: none; }
+        footer a:hover { color: var(--white); }
+
+        /* MOBILE */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .steps { grid-template-columns: 1fr; }
+            .pricing-cards { grid-template-columns: 1fr; }
+            .ex-row { grid-template-columns: 1fr !important; }
+            .comparison { grid-template-columns: 1fr; }
+            .stats-inner { gap: 2rem; }
+            section { padding: 4rem 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <div class="logo">Build<span>Swift</span></div>
+        <div class="nav-links">
+            <a href="#how">How It Works</a>
+            <a href="#examples">Examples</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#industries">Industries</a>
+            <a href="#audit" class="btn btn-primary" style="padding: 0.6rem 1.25rem; font-size: 0.85rem;">Free Site Audit</a>
+        </div>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">⚡ Launching worldwide</div>
+        <h1>Your website is losing you <em>customers</em></h1>
+        <p>We build fast, modern websites for local businesses — designed to convert visitors into paying customers. Ready in 48 hours.</p>
+        <div class="hero-buttons">
+            <a href="#audit" class="btn btn-primary btn-large">Get Your Free Audit →</a>
+            <a href="#how" class="btn btn-outline btn-large">See How It Works</a>
+        </div>
+    </div>
+</section>
+
+<div class="stats">
+    <div class="stats-inner">
+        <div class="stat">
+            <div class="stat-num">48hr</div>
+            <div class="stat-label">Average delivery</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">3x</div>
+            <div class="stat-label">More leads on average</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">100</div>
+            <div class="stat-label">PageSpeed score</div>
+        </div>
+        <div class="stat">
+            <div class="stat-num">$0</div>
+            <div class="stat-label">If you're not happy</div>
+        </div>
+    </div>
+</div>
+
+<section id="how">
+    <div class="section-inner">
+        <div class="section-header">
+            <h2>Three steps. That's it.</h2>
+            <p>No meetings. No back-and-forth. We handle everything.</p>
+        </div>
+        <div class="steps">
+            <div class="step">
+                <div class="step-num">01</div>
+                <h3>We audit your site</h3>
+                <p>We crawl your current website and score it on speed, mobile experience, SEO, and conversion design. You get the report free.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">02</div>
+                <h3>We build it fast</h3>
+                <p>Our team designs and codes a brand-new site tailored to your business. Lightning fast, mobile-first, built to convert.</p>
+            </div>
+            <div class="step">
+                <div class="step-num">03</div>
+                <h3>You go live</h3>
+                <p>Review your new site. Love it? We launch it. Not happy? You pay nothing. We handle hosting, SSL, and everything else.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- EXAMPLES / PORTFOLIO SECTION -->
+<section id="examples" style="background: var(--dark);">
+    <div class="section-inner">
+        <div class="section-header">
+            <h2>Real transformations</h2>
+            <p>We find businesses with outdated websites and rebuild them from scratch. Here's what that looks like.</p>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:4rem;margin-top:3rem;">
+
+            <!-- Example 1 -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start;" class="ex-row">
+                <div style="background:var(--gray-800);border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);">
+                    <div style="background:#c0392b;color:#fff;padding:0.4rem 1rem;font-size:0.75rem;font-weight:700;letter-spacing:0.05em;">BEFORE</div>
+                    <div style="padding:1.5rem;font-family:'Courier New',monospace;">
+                        <div style="background:#ddd;color:#333;padding:4px 8px;font-size:11px;border:2px solid #999;margin-bottom:8px;display:inline-block;">🏠 HOME | ABOUT | SERVICES | CONTACT</div>
+                        <div style="font-size:28px;color:#000080;font-weight:bold;background:#ffffcc;padding:8px;border:3px solid red;margin:8px 0;text-align:center;">WELCOME TO DR. SMITH'S DENTAL!!!</div>
+                        <div style="font-size:11px;color:#666;line-height:1.3;margin-top:8px;">We are a dental office located at 123 Main St. We offer cleanings, fillings, crowns, and more. Call us at (555) 123-4567 to schedule an appointment. We accept most insurance. Open Monday-Friday 9-5. <u><font color="blue">Click here</font></u> for directions. Site last updated: March 2019</div>
+                        <div style="margin-top:8px;display:flex;gap:4px;"><div style="width:40px;height:40px;background:#ccc;border:1px solid #999;font-size:8px;display:flex;align-items:center;justify-content:center;color:#999;">IMG</div><div style="width:40px;height:40px;background:#ccc;border:1px solid #999;font-size:8px;display:flex;align-items:center;justify-content:center;color:#999;">IMG</div><div style="width:40px;height:40px;background:#ccc;border:1px solid #999;font-size:8px;display:flex;align-items:center;justify-content:center;color:#999;">IMG</div></div>
+                    </div>
+                </div>
+                <div style="background:var(--gray-800);border-radius:12px;overflow:hidden;border:1px solid rgba(0,200,100,0.2);">
+                    <div style="background:var(--primary);color:#000;padding:0.4rem 1rem;font-size:0.75rem;font-weight:700;letter-spacing:0.05em;">AFTER — BUILT BY BUILDSWIFT</div>
+                    <div style="padding:1.5rem;background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);border-radius:0 0 8px 8px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><span style="font-weight:700;font-size:14px;color:#fff;">Smith Dental</span><div style="display:flex;gap:12px;font-size:11px;color:rgba(255,255,255,0.6);">Home About Services Book Now</div></div>
+                        <div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;">Your smile, our priority.</div>
+                        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:12px;">Modern dental care in downtown Chicago</div>
+                        <div style="display:inline-block;background:#00c864;color:#000;padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;">Book Appointment →</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:16px;"><div style="background:rgba(255,255,255,0.08);border-radius:6px;padding:10px 8px;text-align:center;"><div style="font-size:18px;margin-bottom:2px;">🦷</div><div style="font-size:10px;color:rgba(255,255,255,0.7);">Cleanings</div></div><div style="background:rgba(255,255,255,0.08);border-radius:6px;padding:10px 8px;text-align:center;"><div style="font-size:18px;margin-bottom:2px;">✨</div><div style="font-size:10px;color:rgba(255,255,255,0.7);">Whitening</div></div><div style="background:rgba(255,255,255,0.08);border-radius:6px;padding:10px 8px;text-align:center;"><div style="font-size:18px;margin-bottom:2px;">👑</div><div style="font-size:10px;color:rgba(255,255,255,0.7);">Crowns</div></div></div>
+                    </div>
+                </div>
+                <div style="grid-column:1/-1;"><h4 style="color:var(--white);margin-bottom:0.25rem;">Dental Practice</h4><p style="color:var(--gray-400);font-size:0.9rem;">From a 2019 relic with Comic Sans energy to a modern practice site with online booking. <span style="color:var(--primary);font-weight:600;">→ 300% more appointment requests</span></p></div>
+            </div>
+
+            <!-- Example 2 -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start;" class="ex-row">
+                <div style="background:var(--gray-800);border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);">
+                    <div style="background:#c0392b;color:#fff;padding:0.4rem 1rem;font-size:0.75rem;font-weight:700;letter-spacing:0.05em;">BEFORE</div>
+                    <div style="padding:1.5rem;background:#f5f0e0;">
+                        <div style="text-align:center;margin-bottom:8px;"><span style="font-family:Georgia,serif;font-size:20px;color:#8B4513;">~ Bella's Bakery ~</span></div>
+                        <div style="display:flex;gap:4px;justify-content:center;margin-bottom:8px;"><div style="width:60px;height:45px;background:#d4c5a9;border:2px solid #8B4513;font-size:7px;display:flex;align-items:center;justify-content:center;color:#8B4513;">blurry<br>cake</div><div style="width:60px;height:45px;background:#d4c5a9;border:2px solid #8B4513;font-size:7px;display:flex;align-items:center;justify-content:center;color:#8B4513;">dark<br>bread</div><div style="width:60px;height:45px;background:#d4c5a9;border:2px solid #8B4513;font-size:7px;display:flex;align-items:center;justify-content:center;color:#8B4513;">tiny<br>photo</div></div>
+                        <div style="font-size:10px;color:#5a4a3a;text-align:center;line-height:1.4;">Welcome to Bella's! We bake fresh bread, cakes, and pastries daily. Visit us at 456 Oak Ave. Call (555) 987-6543. <marquee style="font-size:9px;color:red;">★ NEW: Gluten-free options! ★</marquee></div>
+                        <div style="text-align:center;margin-top:6px;"><div style="display:inline-block;background:#8B4513;color:#f5f0e0;padding:3px 10px;font-size:9px;border-radius:2px;">ENTER SITE →</div></div>
+                    </div>
+                </div>
+                <div style="background:var(--gray-800);border-radius:12px;overflow:hidden;border:1px solid rgba(0,200,100,0.2);">
+                    <div style="background:var(--primary);color:#000;padding:0.4rem 1rem;font-size:0.75rem;font-weight:700;letter-spacing:0.05em;">AFTER — BUILT BY BUILDSWIFT</div>
+                    <div style="padding:1.5rem;background:linear-gradient(135deg,#1a0a00,#2d1810,#3d2317);border-radius:0 0 8px 8px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><span style="font-weight:700;font-size:14px;color:#f4e4c1;">Bella's Bakery</span><div style="display:flex;gap:12px;font-size:11px;color:rgba(244,228,193,0.6);">Menu Catering Order Online</div></div>
+                        <div style="font-size:22px;font-weight:700;color:#f4e4c1;margin-bottom:4px;">Baked fresh. Every morning.</div>
+                        <div style="font-size:12px;color:rgba(244,228,193,0.5);margin-bottom:12px;">Artisan breads, cakes & pastries since 2008</div>
+                        <div style="display:inline-block;background:#d4a853;color:#1a0a00;padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;">Order for Pickup →</div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px;"><div style="background:rgba(244,228,193,0.08);border-radius:8px;padding:12px;"><div style="font-size:11px;font-weight:600;color:#d4a853;">Today's Special</div><div style="font-size:10px;color:rgba(244,228,193,0.6);margin-top:2px;">Sourdough Boule — $8</div></div><div style="background:rgba(244,228,193,0.08);border-radius:8px;padding:12px;"><div style="font-size:11px;font-weight:600;color:#d4a853;">⭐ 4.9 on Google</div><div style="font-size:10px;color:rgba(244,228,193,0.6);margin-top:2px;">127 reviews</div></div></div>
+                    </div>
+                </div>
+                <div style="grid-column:1/-1;"><h4 style="color:var(--white);margin-bottom:0.25rem;">Local Bakery</h4><p style="color:var(--gray-400);font-size:0.9rem;">From a marquee-scrolling 2005 site to a warm, modern storefront with online ordering. <span style="color:var(--primary);font-weight:600;">→ 2x online orders in first month</span></p></div>
+            </div>
+
+            <!-- Example 3 -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start;" class="ex-row">
+                <div style="background:var(--gray-800);border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.06);">
+                    <div style="background:#c0392b;color:#fff;padding:0.4rem 1rem;font-size:0.75rem;font-weight:700;letter-spacing:0.05em;">BEFORE</div>
+                    <div style="padding:1.5rem;background:#003366;">
+                        <div style="color:#ffff00;font-size:16px;font-weight:bold;text-align:center;font-family:Arial;margin-bottom:6px;">⚡ MIKE'S ELECTRIC ⚡</div>
+                        <div style="color:#00ffff;font-size:10px;text-align:center;margin-bottom:8px;">RESIDENTIAL • COMMERCIAL • INDUSTRIAL</div>
+                        <div style="background:#001a33;border:1px solid #0066cc;padding:8px;margin-bottom:6px;"><div style="color:#ff6600;font-size:9px;font-weight:bold;">CALL NOW: (555) 246-8135</div><div style="color:#cccccc;font-size:8px;margin-top:2px;">Licensed & Insured • 24/7 Emergency Service • Free Estimates</div></div>
+                        <div style="display:flex;gap:4px;"><div style="flex:1;background:#004488;padding:4px;text-align:center;font-size:8px;color:#fff;border:1px solid #0066cc;">Services</div><div style="flex:1;background:#004488;padding:4px;text-align:center;font-size:8px;color:#fff;border:1px solid #0066cc;">About</div><div style="flex:1;background:#004488;padding:4px;text-align:center;font-size:8px;color:#fff;border:1px solid #0066cc;">Contact</div></div>
+                        <div style="color:#999;font-size:7px;text-align:center;margin-top:6px;">© 2016 Mike's Electric. Designed by Mike's nephew.</div>
+                    </div>
+                </div>
+                <div style="background:var(--gray-800);border-radius:12px;overflow:hidden;border:1px solid rgba(0,200,100,0.2);">
+                    <div style="background:var(--primary);color:#000;padding:0.4rem 1rem;font-size:0.75rem;font-weight:700;letter-spacing:0.05em;">AFTER — BUILT BY BUILDSWIFT</div>
+                    <div style="padding:1.5rem;background:linear-gradient(135deg,#0a0a0a,#1a1a2e,#16213e);border-radius:0 0 8px 8px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><span style="font-weight:700;font-size:14px;color:#fff;">⚡ Mike's Electric</span><div style="background:#ff6b35;color:#fff;padding:4px 10px;border-radius:4px;font-size:10px;font-weight:600;">Emergency: (555) 246-8135</div></div>
+                        <div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:4px;">Trusted electrician since 2010.</div>
+                        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:12px;">Licensed • Insured • 24/7 Emergency Service</div>
+                        <div style="display:inline-block;background:#ff6b35;color:#fff;padding:6px 16px;border-radius:6px;font-size:12px;font-weight:600;">Get Free Estimate →</div>
+                        <div style="display:flex;gap:6px;margin-top:16px;"><div style="flex:1;background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.2);border-radius:6px;padding:8px;text-align:center;"><div style="font-size:14px;">🏠</div><div style="font-size:9px;color:rgba(255,255,255,0.7);margin-top:2px;">Residential</div></div><div style="flex:1;background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.2);border-radius:6px;padding:8px;text-align:center;"><div style="font-size:14px;">🏢</div><div style="font-size:9px;color:rgba(255,255,255,0.7);margin-top:2px;">Commercial</div></div><div style="flex:1;background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.2);border-radius:6px;padding:8px;text-align:center;"><div style="font-size:14px;">🚨</div><div style="font-size:9px;color:rgba(255,255,255,0.7);margin-top:2px;">Emergency</div></div></div>
+                    </div>
+                </div>
+                <div style="grid-column:1/-1;"><h4 style="color:var(--white);margin-bottom:0.25rem;">Electrician</h4><p style="color:var(--gray-400);font-size:0.9rem;">From "designed by Mike's nephew" to a professional service site that actually converts. <span style="color:var(--primary);font-weight:600;">→ 5x more estimate requests</span></p></div>
+            </div>
+
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <p style="color: var(--gray-400); margin-bottom: 1.5rem;">Your website could be next.</p>
+            <a href="#pricing" class="btn btn-primary btn-large">See Pricing →</a>
+        </div>
+    </div>
+</section>
+
+<section id="pricing" style="background: var(--gray-900);">
+    <div class="section-inner">
+        <div class="section-header">
+            <h2>Pricing that can't be beat</h2>
+            <p>Custom-built websites at prices no human agency can match.</p>
+        </div>
+        <div class="pricing-cards" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="pricing-card">
+                <h3>Standard</h3>
+                <div class="price">$99 <span>one-time</span></div>
+                <p class="desc">Custom-built website with 3 months free support, then just $5/mo.</p>
+                <ul>
+                    <li>Custom designed website</li>
+                    <li>Mobile responsive</li>
+                    <li>SEO optimized</li>
+                    <li>Contact form</li>
+                    <li>48-hour delivery</li>
+                    <li>3 months free support</li>
+                    <li>Then $5/mo for 9 months</li>
+                    <li>$10/mo ongoing (opt-in)</li>
+                    <li>+ hosting fees</li>
+                </ul>
+                <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="openCheckout('standard')">Get Started</button>
+            </div>
+            <div class="pricing-card featured">
+                <h3>All-Inclusive</h3>
+                <div class="price">$0 <span>down</span></div>
+                <p class="desc" style="font-size: 1.4rem; font-weight: 600; color: var(--primary); margin-bottom: 4px;">$20/month × 12 months</p>
+                <p class="desc">Everything included — build, hosting, support, taxes. No surprises.</p>
+                <ul>
+                    <li>Custom designed website</li>
+                    <li>Mobile responsive</li>
+                    <li>SEO optimized</li>
+                    <li>Hosting included</li>
+                    <li>Ongoing support included</li>
+                    <li>SSL certificate included</li>
+                    <li>48-hour delivery</li>
+                    <li>90-day minimum commitment</li>
+                    <li>No hidden fees</li>
+                </ul>
+                <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="openCheckout('all_inclusive')">Start Free — Pay Monthly</button>
+            </div>
+            <div class="pricing-card">
+                <h3>Premium</h3>
+                <div class="price">$150 <span>one-time</span></div>
+                <p class="desc">Pay once, get a full year of support included. Own it outright.</p>
+                <ul>
+                    <li>Custom designed website</li>
+                    <li>Mobile responsive</li>
+                    <li>SEO optimized</li>
+                    <li>Contact form + integrations</li>
+                    <li>48-hour delivery</li>
+                    <li>12 months free support</li>
+                    <li>$10/mo ongoing (opt-in)</li>
+                    <li>+ hosting fees</li>
+                    <li>Priority build queue</li>
+                </ul>
+                <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="openCheckout('premium')">Get Started</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="industries">
+    <div class="section-inner">
+        <div class="section-header">
+            <h2>Built for local businesses</h2>
+            <p>We specialize in websites that drive foot traffic and phone calls.</p>
+        </div>
+        <div class="industries-grid">
+            <div class="industry-card">
+                <div class="industry-icon">🍽️</div>
+                <h4>Restaurants</h4>
+            </div>
+            <div class="industry-card">
+                <div class="industry-icon">🔧</div>
+                <h4>Plumbers</h4>
+            </div>
+            <div class="industry-card">
+                <div class="industry-icon">💇</div>
+                <h4>Salons</h4>
+            </div>
+            <div class="industry-card">
+                <div class="industry-icon">🏋️</div>
+                <h4>Gyms & Fitness</h4>
+            </div>
+            <div class="industry-card">
+                <div class="industry-icon">🦷</div>
+                <h4>Dentists</h4>
+            </div>
+            <div class="industry-card">
+                <div class="industry-icon">⚡</div>
+                <h4>Electricians</h4>
+            </div>
+            <div class="industry-card">
+                <div class="industry-icon">🏠</div>
+                <h4>Real Estate</h4>
+            </div>
+            <div class="industry-card">
+                <div class="industry-icon">🐾</div>
+                <h4>Pet Services</h4>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section style="background: var(--gray-900);">
+    <div class="section-inner">
+        <div class="section-header">
+            <h2>The difference is obvious</h2>
+            <p>What your customers see now vs. what they could see.</p>
+        </div>
+        <div class="comparison">
+            <div class="comp-card before">
+                <h3>❌ Your current site</h3>
+                <ul>
+                    <li>Slow loading (5+ seconds)</li>
+                    <li>Looks broken on mobile</li>
+                    <li>No clear call to action</li>
+                    <li>Outdated design from 2015</li>
+                    <li>Not showing up on Google</li>
+                    <li>Visitors leave in seconds</li>
+                </ul>
+            </div>
+            <div class="comp-card after">
+                <h3>✓ Your BuildSwift site</h3>
+                <ul>
+                    <li>Loads in under 1 second</li>
+                    <li>Beautiful on every device</li>
+                    <li>Click-to-call, book, or order</li>
+                    <li>Modern, professional design</li>
+                    <li>SEO built-in from day one</li>
+                    <li>Visitors become customers</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="audit" class="cta-section">
+    <h2>Get your free site audit</h2>
+    <p>Enter your website and we'll send you a full performance report — speed, SEO, mobile, and conversion score.</p>
+    <div class="audit-form">
+        <h3>Free Website Audit</h3>
+        <p>Takes 30 seconds. No commitment.</p>
+        <form id="auditForm" onsubmit="submitAudit(event)">
+            <div class="form-group">
+                <input type="text" name="business" placeholder="Business name" required>
+            </div>
+            <div class="form-group">
+                <input type="url" name="website" placeholder="Current website URL" required>
+            </div>
+            <div class="form-group">
+                <input type="email" name="email" placeholder="Email address" required>
+            </div>
+            <div class="form-group">
+                <input type="tel" name="phone" placeholder="Phone (optional)">
+            </div>
+            <div class="form-group">
+                <select name="industry">
+                    <option value="" disabled selected>Industry</option>
+                    <option>Restaurant / Food</option>
+                    <option>Plumbing / HVAC</option>
+                    <option>Salon / Barber</option>
+                    <option>Gym / Fitness</option>
+                    <option>Dental / Medical</option>
+                    <option>Electrician</option>
+                    <option>Real Estate</option>
+                    <option>Pet Services</option>
+                    <option>Other</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-large" style="width:100%; justify-content:center;">Send My Free Audit →</button>
+        </form>
+    </div>
+</section>
+
+<footer>
+    <p style="margin-bottom: 0.5rem;">BuildSwift — Professional websites, built fast.</p>
+    <p>Owned by Urban Kayaks, LLC · <a href="mailto:hello@buildswift.co">hello@buildswift.co</a></p>
+</footer>
+
+<!-- Checkout Modal -->
+<div id="checkoutModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);align-items:center;justify-content:center;">
+  <div style="background:#111;border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:2.5rem;max-width:440px;width:90%;position:relative;">
+    <button onclick="closeCheckout()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;color:#888;font-size:1.5rem;cursor:pointer;">&times;</button>
+    <h3 style="margin-bottom:0.5rem;color:#fff;" id="modalTitle">Get Started</h3>
+    <p style="color:#888;margin-bottom:1.5rem;font-size:0.9rem;" id="modalDesc">Tell us about your business and we'll build your site.</p>
+    <form id="checkoutForm" onsubmit="submitCheckout(event)">
+      <input type="hidden" id="selectedPackage" value="">
+      <div style="margin-bottom:1rem;">
+        <input type="text" id="ckBusiness" placeholder="Business name" required style="width:100%;padding:0.75rem 1rem;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:1rem;">
+      </div>
+      <div style="margin-bottom:1rem;">
+        <input type="email" id="ckEmail" placeholder="Email address" required style="width:100%;padding:0.75rem 1rem;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:1rem;">
+      </div>
+      <div style="margin-bottom:1rem;">
+        <select id="ckIndustry" style="width:100%;padding:0.75rem 1rem;background:#1a1a1a;border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:1rem;">
+          <option value="">Industry (optional)</option>
+          <option>Restaurant / Food</option>
+          <option>Medical / Dental</option>
+          <option>Plumbing / HVAC</option>
+          <option>Salon / Barber</option>
+          <option>Gym / Fitness</option>
+          <option>Real Estate</option>
+          <option>Electrician</option>
+          <option>Pet Services</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <button type="submit" id="checkoutBtn" class="btn btn-primary" style="width:100%;justify-content:center;padding:1rem;font-size:1.1rem;">Proceed to Payment →</button>
+    </form>
+  </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+const PACKAGE_INFO = {
+  standard: { title: 'Standard — $99', desc: 'One-time payment + hosting. 3 months free support.' },
+  all_inclusive: { title: 'All-Inclusive — $20/mo', desc: '$0 down. Hosting, support & taxes included. 90-day min.' },
+  premium: { title: 'Premium — $150', desc: 'One-time payment + hosting. Full year of support.' }
+};
+
+function openCheckout(pkg) {
+  document.getElementById('selectedPackage').value = pkg;
+  const info = PACKAGE_INFO[pkg];
+  document.getElementById('modalTitle').textContent = info.title;
+  document.getElementById('modalDesc').textContent = info.desc;
+  document.getElementById('checkoutModal').style.display = 'flex';
+}
+
+function closeCheckout() {
+  document.getElementById('checkoutModal').style.display = 'none';
+}
+
+async function submitCheckout(e) {
+  e.preventDefault();
+  const btn = document.getElementById('checkoutBtn');
+  btn.textContent = 'Loading...';
+  btn.disabled = true;
+  try {
+    const res = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        package: document.getElementById('selectedPackage').value,
+        business_name: document.getElementById('ckBusiness').value,
+        email: document.getElementById('ckEmail').value,
+        industry: document.getElementById('ckIndustry').value
+      })
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert('Error: ' + (data.error || 'Could not create checkout session'));
+      btn.textContent = 'Proceed to Payment →';
+      btn.disabled = false;
+    }
+  } catch (err) {
+    alert('Network error. Please try again.');
+    btn.textContent = 'Proceed to Payment →';
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('checkoutModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCheckout();
+});
+
+async function submitAudit(e) {
+  e.preventDefault();
+  const form = e.target;
+  const btn = form.querySelector('button[type="submit"]');
+  const origText = btn.textContent;
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+  const data = Object.fromEntries(new FormData(form));
+  try {
+    const res = await fetch('/api/audit', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      form.innerHTML = '<div style="text-align:center;padding:2rem;"><h3 style="color:var(--primary);">✅ Audit Requested!</h3><p style="color:var(--gray-400);margin-top:1rem;">We\'ll email your free site report within 24 hours.</p></div>';
+    } else {
+      // Fallback: send via mailto
+      window.location.href = 'mailto:hello@buildswift.co?subject=Free Site Audit Request&body=' + encodeURIComponent(
+        'Business: ' + (data.business||'') + '\nWebsite: ' + (data.website||'') + '\nEmail: ' + (data.email||'') + '\nPhone: ' + (data.phone||'') + '\nIndustry: ' + (data.industry||'')
+      );
+      btn.textContent = origText; btn.disabled = false;
+    }
+  } catch(err) {
+    // Offline/no server — email fallback
+    window.location.href = 'mailto:hello@buildswift.co?subject=Free Site Audit Request&body=' + encodeURIComponent(
+      'Business: ' + (data.business||'') + '\nWebsite: ' + (data.website||'') + '\nEmail: ' + (data.email||'') + '\nPhone: ' + (data.phone||'') + '\nIndustry: ' + (data.industry||'')
+    );
+    btn.textContent = origText; btn.disabled = false;
+  }
+}
+</script>
+
+</body>
+</html>

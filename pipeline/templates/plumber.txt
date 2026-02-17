@@ -1,0 +1,10 @@
+Industry-specific notes for plumbers/HVAC:
+- Emergency service callout prominently in hero ("24/7 Emergency Service")
+- Click-to-call button must be huge and visible
+- Trust badges: licensed, bonded, insured
+- Service area list
+- Before/after section placeholder
+- "Free Estimate" CTA form
+- Customer testimonials with star ratings
+- List of specific services (drain cleaning, water heater, etc.)
+- Response time guarantee if available

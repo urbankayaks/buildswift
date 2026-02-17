@@ -1,0 +1,9 @@
+Industry-specific notes for restaurants:
+- Include a "View Menu" CTA button prominently in hero
+- Add a reservation/booking section or link
+- Show cuisine type and atmosphere keywords for SEO
+- Include food-related emoji or icons in services section
+- Google Maps embed placeholder for the address
+- Online ordering CTA if applicable
+- Photo gallery placeholder section
+- Customer testimonial/review section with star ratings
