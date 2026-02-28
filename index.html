@@ -419,25 +419,89 @@
             }
 
             emptyState.classList.add('hidden');
-            companyGrid.innerHTML = filteredCompanies.map((company, idx) => `
-                <div class="company-card bg-slate-900 border border-slate-800 rounded-xl p-5 cursor-pointer hover:border-emerald-500/50 hover:-translate-y-1 transition-all duration-200 fade-in ${company.source_count > 2 ? 'card-highlight' : ''}" data-idx="${idx}">
-                    <div class="flex items-start justify-between mb-3">
-                        <h3 class="font-semibold text-lg text-white leading-tight">${company.name}</h3>
-                        ${company.ticker ? `<span class="px-2 py-0.5 bg-slate-800 rounded text-xs font-mono text-emerald-400">${company.ticker}</span>` : ''}
-                    </div>
-                    <div class="flex flex-wrap gap-2 mb-3">
-                        ${company.market_cap_b ? `<span class="text-emerald-400 font-medium">${formatCap(company.market_cap_b)}</span>` : ''}
-                        ${company.subsector ? `<span class="px-2 py-0.5 bg-slate-800 rounded-full text-xs text-slate-400">${company.subsector}</span>` : ''}
-                    </div>
-                    <div class="flex items-center justify-between text-sm">
-                        <span class="px-2 py-1 rounded text-xs font-medium border ${getStatusClass(company.deal_status)}">${company.deal_status.replace('_', ' ')}</span>
-                        <div class="text-right">
-                            <span class="text-slate-400">${company.source_count} source${company.source_count > 1 ? 's' : ''}</span>
-                            ${company.latest_update ? `<div class="text-xs text-slate-500">${formatDate(company.latest_update)}</div>` : ''}
+            companyGrid.innerHTML = filteredCompanies.map((company, idx) => {
+                const hasSignals = company.source_count > 0;
+                const isHighScore = company.acquisition_score > 5;
+                
+                // Format market cap
+                const marketCapFormatted = company.market_cap_b ? `$${company.market_cap_b.toFixed(1)}B` : '';
+                
+                // Format stock price and change
+                let stockPriceHTML = '';
+                if (company.stock_price) {
+                    const changeSymbol = company.price_change_pct > 0 ? '▲' : '▼';
+                    const changeColor = company.price_change_pct > 0 ? 'text-green-400' : 'text-red-400';
+                    stockPriceHTML = `
+                        <span class="text-white font-bold">$${company.stock_price.toFixed(2)}</span>
+                        <span class="${changeColor}">${changeSymbol} ${Math.abs(company.price_change_pct).toFixed(1)}%</span>
+                        ${marketCapFormatted ? `<span class="text-slate-400 ml-auto">MCap: ${marketCapFormatted}</span>` : ''}
+                    `;
+                } else if (marketCapFormatted) {
+                    stockPriceHTML = `<span class="text-slate-300">${marketCapFormatted}</span>`;
+                }
+                
+                // Format 52-week range
+                const fiftyTwoWeekHTML = (company.fifty_two_week_low && company.fifty_two_week_high) 
+                    ? `<div class="text-xs text-slate-500">52W: $${company.fifty_two_week_low.toFixed(2)} — $${company.fifty_two_week_high.toFixed(2)}</div>` 
+                    : '';
+                
+                // Format revenue and employees
+                let revenueHTML = '';
+                if (company.revenue_m !== undefined && company.revenue_m !== null || company.employees) {
+                    const revFormatted = (company.revenue_m !== undefined && company.revenue_m !== null) ? `$${company.revenue_m.toFixed(1)}M` : '';
+                    const growthColor = company.revenue_growth_pct > 0 ? 'text-green-400' : 'text-red-400';
+                    const growthFormatted = company.revenue_growth_pct 
+                        ? `<span class="${growthColor}">(${company.revenue_growth_pct > 0 ? '+' : ''}${company.revenue_growth_pct.toFixed(1)}%)</span>` 
+                        : '';
+                    const empFormatted = company.employees ? company.employees.toLocaleString() : '';
+                    
+                    if (revFormatted || empFormatted) {
+                        revenueHTML = `
+                            <div class="flex items-center justify-between text-sm mt-2">
+                                ${revFormatted || growthFormatted ? `<span>${revFormatted} ${growthFormatted}</span>` : ''}
+                                ${empFormatted ? `<span class="text-slate-400">👥 ${empFormatted}</span>` : ''}
+                            </div>
+                        `;
+                    }
+                }
+                
+                // Format HQ location
+                const hqHTML = company.hq_location 
+                    ? `<div class="text-xs text-slate-500 mt-2">📍 ${company.hq_location}</div>` 
+                    : '';
+                
+                // Format description
+                const descHTML = company.description 
+                    ? `<div class="text-xs text-slate-400 mt-2 line-clamp-2">${company.description}</div>` 
+                    : '';
+                
+                // Signal indicator
+                const signalHTML = hasSignals 
+                    ? `<span class="text-orange-400 text-sm font-medium">🔥 ${company.source_count} signal${company.source_count > 1 ? 's' : ''}</span>` 
+                    : '';
+                
+                return `
+                    <div class="company-card bg-slate-900 border rounded-xl p-4 cursor-pointer hover:-translate-y-1 transition-all duration-200 fade-in ${hasSignals ? 'border-l-4 border-l-emerald-500' : 'border-slate-800'} ${isHighScore ? 'shadow-lg shadow-emerald-500/10' : ''}" data-idx="${idx}">
+                        <div class="flex items-start justify-between mb-2">
+                            <span class="px-2 py-0.5 rounded text-xs font-medium border ${getStatusClass(company.deal_status)}">${company.deal_status.replace('_', ' ')}</span>
+                            ${signalHTML}
                         </div>
+                        
+                        <h3 class="font-bold text-lg text-white mt-2">${company.name}</h3>
+                        <div class="text-sm text-slate-400 mt-0.5">
+                            ${company.ticker ? `<span class="font-mono text-emerald-400">${company.ticker}</span>` : ''}
+                            ${company.ticker && company.subsector ? ' · ' : ''}
+                            ${company.subsector || ''}
+                        </div>
+                        
+                        ${stockPriceHTML ? `<div class="flex items-center gap-2 mt-3">${stockPriceHTML}</div>` : ''}
+                        ${fiftyTwoWeekHTML}
+                        ${revenueHTML}
+                        ${hqHTML}
+                        ${descHTML}
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
 
             // Add click handlers
             document.querySelectorAll('.company-card').forEach(card => {
