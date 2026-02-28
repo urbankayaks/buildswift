@@ -259,24 +259,24 @@
             const groups = [];
 
             for (const deal of deals) {
-                // New format: deal already has embedded sources array from company_builder
-                if (deal.sources && Array.isArray(deal.sources) && deal.sources.length > 0 && deal.sources[0].source_name) {
+                // New company-first format (from company_builder)
+                if (deal.sources !== undefined && Array.isArray(deal.sources)) {
                     groups.push({
                         name: deal.name,
                         ticker: deal.ticker,
                         market_cap_b: deal.market_cap_b,
                         subsector: deal.subsector,
-                        deal_status: deal.deal_status,
-                        deal_type: deal.deal_type,
-                        sources: deal.sources,
-                        source_count: deal.signal_count || deal.sources.length,
+                        deal_status: deal.deal_status || 'potential_target',
+                        deal_type: deal.deal_type || 'acquisition',
+                        sources: deal.sources || [],
+                        source_count: deal.signal_count || deal.sources.length || 0,
                         acquisition_score: deal.acquisition_score || 0,
-                        latest_update: deal.last_updated
+                        latest_update: deal.last_updated || ''
                     });
                     continue;
                 }
 
-                // Fallback: old flat format — treat each deal as its own "company"
+                // Fallback: old flat format
                 groups.push({
                     name: deal.name,
                     ticker: deal.ticker,
@@ -285,9 +285,9 @@
                     deal_status: deal.deal_status,
                     deal_type: deal.deal_type,
                     sources: [{
-                        source_name: deal.source_name,
-                        source_url: deal.source_url,
-                        summary: deal.summary,
+                        source_name: deal.source_name || '',
+                        source_url: deal.source_url || '',
+                        summary: deal.summary || '',
                         deal_status: deal.deal_status,
                         deal_type: deal.deal_type,
                         date: deal.last_updated
@@ -327,7 +327,7 @@
                 subsectors.map(s => `<option value="${s}">${s}</option>`).join('');
 
             // Sources
-            const sources = [...new Set(allCompanies.flatMap(c => c.sources.map(s => s.source_name)))].sort();
+            const sources = [...new Set(allCompanies.flatMap(c => c.sources.map(s => s.source_name)).filter(Boolean))].sort();
             sourceFilter.innerHTML = '<option value="">All Sources</option>' + 
                 sources.map(s => `<option value="${s}">${s}</option>`).join('');
         }
