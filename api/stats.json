@@ -1,0 +1,19 @@
+{
+  "total": 117,
+  "by_status": {
+    "completed": 1,
+    "confirmed": 4,
+    "exploring_alternatives": 3,
+    "rumored": 109
+  },
+  "by_subsector": {
+    "Biotech": 2,
+    "Diagnostics": 20,
+    "Digital Health": 4,
+    "Implants & Ortho": 1,
+    "Medical Devices": 71,
+    "Medical Technology": 1,
+    "Pharmaceuticals": 2,
+    "Surgical": 16
+  }
+}

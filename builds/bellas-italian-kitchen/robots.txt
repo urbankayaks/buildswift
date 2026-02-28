@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://bellasitaliankitchen.com/sitemap.xml
