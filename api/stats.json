@@ -1,19 +1,22 @@
 {
-  "total": 117,
+  "total": 208,
   "by_status": {
     "completed": 1,
     "confirmed": 4,
     "exploring_alternatives": 3,
-    "rumored": 109
+    "potential_target": 53,
+    "rumored": 147
   },
   "by_subsector": {
-    "Biotech": 2,
-    "Diagnostics": 20,
-    "Digital Health": 4,
-    "Implants & Ortho": 1,
-    "Medical Devices": 71,
+    "Biotech": 5,
+    "Diagnostics": 30,
+    "Digital Health": 6,
+    "Implants & Ortho": 13,
+    "Interventional": 10,
+    "Medical Devices": 104,
+    "Medical Imaging": 6,
     "Medical Technology": 1,
-    "Pharmaceuticals": 2,
-    "Surgical": 16
+    "Pharmaceuticals": 6,
+    "Surgical": 27
   }
 }

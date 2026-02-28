@@ -1,21 +1,7 @@
 {
   "deals": [
     {
-      "id": 136,
-      "name": "Helius to explore 'strategic alternatives' with revenue from flagship product stunted by pricing iss",
-      "ticker": null,
-      "market_cap_b": null,
-      "subsector": "Medical Devices",
-      "deal_status": "exploring_alternatives",
-      "deal_type": "acquisition",
-      "summary": "Helius to explore 'strategic alternatives' with revenue from flagship product stunted by pricing issues - The Business Journals. Helius to explore 'strategic alternatives' with revenue from flagship product stunted by pricing issues\u00a0\u00a0The Business Journals",
-      "source_url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxQcW1sd3ZIb0FESVo0VDNvb24yblFlU0hWeDZxNkRaYU1BZUVEbG9iQjF5bUVXRWo2Ymxfd3pxNWpmWHFWWVl0RFNGd0hRTUl5bWJlLXBUTHVaT2x4MVdzbUlhQS1QZHloSVRaSXphMUtYQmU5VXI5LWVzaWxvQVR1c003cEt2eEtrWDRBT25fOG8wbWpudXB4NW9KeUZkZFFPN1RlVlZDVmo2bV8t?oc=5",
-      "source_name": "Google News",
-      "first_seen": "2026-02-28T16:24:49.300210",
-      "last_updated": "2026-02-28T16:24:49.300210"
-    },
-    {
-      "id": 132,
+      "id": 57,
       "name": "Helius to Explore Strategic Alternatives After CMS Disappointment",
       "ticker": null,
       "market_cap_b": null,
@@ -25,11 +11,11 @@
       "summary": "Helius to Explore Strategic Alternatives After CMS Disappointment - Medical Device and Diagnostic industry. Helius to Explore Strategic Alternatives After CMS Disappointment\u00a0\u00a0Medical Device and Diagnostic industry",
       "source_url": "https://news.google.com/rss/articles/CBMiowFBVV95cUxOdGs4Z2xwT3FEM29UNUJyZ2pjR3ZsZlRVRlhDcExyQ3FVWDZtSEVydy12VlVxY1RnTEI4Q1BmalJnV0RtVzRTVmNReDhFWFBQcTdXT2NneW01cDFSVnBnaTFXT3l1dVlHUHdwRlBIVFp3RXJ0Y1Znbkdua0RDNEFIOG04VlR6dVpHRjIzYl9MaFRDRVl5MTN1NXpEVVZSSlA3WnU0?oc=5",
       "source_name": "Google News",
-      "first_seen": "2026-02-28T16:24:49.297996",
-      "last_updated": "2026-02-28T16:24:49.297996"
+      "first_seen": "2026-02-28T17:28:39.772846",
+      "last_updated": "2026-02-28T17:28:39.772846"
     },
     {
-      "id": 126,
+      "id": 49,
       "name": "Dentsply to keep Wellspect biz after considering alternatives",
       "ticker": null,
       "market_cap_b": null,
@@ -39,8 +25,22 @@
       "summary": "Dentsply to keep Wellspect biz after considering alternatives - MassDevice. Dentsply to keep Wellspect biz after considering alternatives\u00a0\u00a0MassDevice",
       "source_url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxPLXcybENYQ0E0ZmJ6bkNsbzJzaE96UFNNLUNOUjc4N2hiaGtDb2t6S3RCY0NoY19tbVI2N3BRLWR1emNXbEZzTmJTeG5ZV2dhU25UUmxDSmJTaEtOVjJmR3pYTGlIZFR4V3NTUkpfTlJ4U1oxemFfUVgwLUlUQ0taMVQxd1FZWVdI?oc=5",
       "source_name": "Google News",
-      "first_seen": "2026-02-28T16:07:59.630625",
-      "last_updated": "2026-02-28T16:24:49.293614"
+      "first_seen": "2026-02-28T17:28:39.767700",
+      "last_updated": "2026-02-28T17:28:39.767700"
+    },
+    {
+      "id": 48,
+      "name": "Dentsply Sirona Retains Wellspect Healthcare as a Portfolio Business Following Comprehensive Review ",
+      "ticker": null,
+      "market_cap_b": null,
+      "subsector": "Medical Devices",
+      "deal_status": "exploring_alternatives",
+      "deal_type": "acquisition",
+      "summary": "Dentsply Sirona Retains Wellspect Healthcare as a Portfolio Business Following Comprehensive Review of Strategic Alternatives - Yahoo Finance. Dentsply Sirona Retains Wellspect Healthcare as a Portfolio Business Following Comprehensive Review of Strategic Alternatives\u00a0\u00a0Yahoo Finance",
+      "source_url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxNVGk3eF9pa28zeExjeWVxVnhyNTEweWo4ZlNacGhyU2V5bnRBQUFGTWR6ZXVzRkJKVGpJSExLdk9ncVBkZm5oQ2dqLUhrblFLblhRYzg1WGNDNV9VOVNxVmZlVUlGMnUwMm1DSm1ZZkR1RjRwamxQTTB0QlZfN3BsbjNDLXEyRFk0WEt2azFCYWxlRTBq?oc=5",
+      "source_name": "Google News",
+      "first_seen": "2026-02-28T17:28:39.767023",
+      "last_updated": "2026-02-28T17:28:39.767023"
     }
   ],
   "count": 3
