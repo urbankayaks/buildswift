@@ -3,35 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedTech Deals Tracker</title>
+    <title>MedTech M&A Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
         .cat-card { transition: transform 0.15s, box-shadow 0.15s; cursor: pointer; }
         .cat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
+        .cat-card.active { ring: 2px; }
         .deal-row { transition: background-color 0.1s; }
         .deal-row:hover { background-color: rgba(255,255,255,0.05); }
-        .slide-down { animation: slideDown 0.25s ease-out; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        .truncate-1 { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .slide-down { animation: slideDown 0.2s ease-out; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .truncate-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .spinner { animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .pulse-dot { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
+
     <!-- Header -->
     <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-4 py-5 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <div>
-                <h1 class="text-3xl font-extrabold tracking-tight">🔬 MedTech M&A Intel</h1>
-                <p class="text-slate-500 text-sm mt-0.5">Real-time acquisition intelligence · <span id="totalCount">-</span> targets tracked</p>
+                <h1 class="text-2xl font-extrabold tracking-tight">🔬 MedTech M&A Intelligence</h1>
+                <p class="text-slate-500 text-xs mt-0.5"><span id="totalCount">-</span> targets tracked · Finding acquisition opportunities</p>
             </div>
             <div class="flex items-center gap-3">
                 <span id="lastUpdate" class="text-xs text-slate-600"></span>
-                <button id="refreshBtn" onclick="refreshData()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition">
+                <button id="refreshBtn" onclick="refreshData()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition">
                     <svg id="refreshIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                     <span id="refreshText">Refresh</span>
                 </button>
@@ -39,157 +41,146 @@
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 py-8">
-        <!-- Search bar (global) -->
-        <div class="mb-8">
-            <input id="globalSearch" type="text" placeholder="Search all deals by company, ticker, sector..."
-                   class="w-full bg-slate-900 border border-slate-700 rounded-xl px-5 py-3 text-base text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/50">
-        </div>
+    <main class="max-w-7xl mx-auto px-4 py-6">
 
-        <!-- Category Cards -->
-        <div id="categoryGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
-            <!-- Populated by JS -->
-        </div>
+        <!-- Category Tiles -->
+        <div id="categoryGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6"></div>
 
-        <!-- Expanded Deal List (shown when category is clicked) -->
-        <div id="dealPanel" class="hidden slide-down">
-            <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
-                <!-- Panel header -->
-                <div id="panelHeader" class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <button onclick="closePanel()" class="text-slate-400 hover:text-white transition">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                        </button>
-                        <h2 id="panelTitle" class="text-xl font-bold"></h2>
-                        <span id="panelCount" class="text-sm text-slate-400"></span>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <select id="panelSubsector" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none">
-                            <option value="">All Subsectors</option>
-                        </select>
-                        <select id="panelSort" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none">
-                            <option value="last_updated">Latest</option>
-                            <option value="name">Name</option>
-                            <option value="market_cap_b">Market Cap</option>
-                        </select>
-                    </div>
+        <!-- Filter Bar -->
+        <div id="filterBar" class="bg-slate-900 rounded-xl border border-slate-800 p-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
+                <div class="md:col-span-2">
+                    <input id="searchInput" type="text" placeholder="Search company, ticker, keyword..."
+                           class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
                 </div>
-                <!-- Deal list -->
-                <div id="dealList" class="divide-y divide-slate-800/50 max-h-[70vh] overflow-y-auto">
-                    <!-- Populated by JS -->
+                <select id="subsectorFilter" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                    <option value="">All Subsectors</option>
+                </select>
+                <select id="sourceFilter" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                    <option value="">All Sources</option>
+                </select>
+                <div class="flex gap-2">
+                    <input id="minCap" type="number" placeholder="Min $B" step="0.1" min="0"
+                           class="w-1/2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+                    <input id="maxCap" type="number" placeholder="Max $B" step="0.1" min="0"
+                           class="w-1/2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
                 </div>
+                <select id="sortSelect" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
+                    <option value="last_updated">Latest Updated</option>
+                    <option value="first_seen">Newest Found</option>
+                    <option value="market_cap_b">Market Cap ↓</option>
+                    <option value="name">Name A-Z</option>
+                </select>
             </div>
         </div>
 
-        <!-- Search Results (shown when searching) -->
-        <div id="searchResults" class="hidden slide-down">
-            <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
-                <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <h2 class="text-xl font-bold">🔍 Search Results</h2>
-                        <span id="searchCount" class="text-sm text-slate-400"></span>
-                    </div>
-                    <button onclick="clearSearch()" class="text-slate-400 hover:text-white text-sm">Clear</button>
-                </div>
-                <div id="searchList" class="divide-y divide-slate-800/50 max-h-[70vh] overflow-y-auto"></div>
+        <!-- Results Header -->
+        <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+                <span id="activeCategory" class="text-sm font-semibold text-slate-300"></span>
+                <span id="resultCount" class="text-xs text-slate-500"></span>
+            </div>
+            <button id="clearFilters" onclick="resetAll()" class="text-xs text-slate-500 hover:text-slate-300 hidden">Clear all filters</button>
+        </div>
+
+        <!-- Deal List -->
+        <div id="dealList" class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+            <div class="divide-y divide-slate-800/50" id="dealRows">
+                <div class="px-6 py-12 text-center text-slate-500">Loading...</div>
             </div>
         </div>
+
     </main>
 
     <script>
         const STATIC_MODE = !window.location.port;
         let ALL_DEALS = [];
-        let currentCategory = null;
+        let activeCategory = null;
 
         // ═══════════════════════════════════════
-        // CATEGORY DEFINITIONS
+        // INTELLIGENCE CATEGORIES
+        // Red Alert = must-examine buy opportunities
         // ═══════════════════════════════════════
         const CATEGORIES = [
             {
                 id: 'red_alert',
-                label: '🔴 RED ALERT',
-                subtitle: 'High-Value Targets',
-                description: 'Confirmed deals and definitive agreements on large-cap medtech companies',
-                bg: 'from-red-950 to-red-900',
-                border: 'border-red-800',
-                glow: 'hover:shadow-red-900/30',
-                dot: 'bg-red-500',
-                filter: d => d.deal_status === 'confirmed' || (d.deal_status === 'completed' && d.market_cap_b && d.market_cap_b >= 5)
+                emoji: '🔴',
+                label: 'RED ALERT',
+                subtitle: 'Must-Examine Targets',
+                border: 'border-red-700',
+                activeBg: 'bg-red-950',
+                textColor: 'text-red-400',
+                dotColor: 'bg-red-500',
+                pulse: true,
+                // Multi-source mentions, exploring alternatives, or confirmed with signals
+                filter: d => {
+                    if (d.deal_status === 'exploring_alternatives') return true;
+                    // Confirmed large-cap deals are buy signals for competitors
+                    if (d.deal_status === 'confirmed' && d.market_cap_b && d.market_cap_b >= 2) return true;
+                    return false;
+                }
             },
             {
-                id: 'likely',
-                label: '🟠 LIKELY TARGETS',
-                subtitle: 'Exploring Alternatives',
-                description: 'Companies actively exploring strategic alternatives or with strong acquisition signals',
-                bg: 'from-orange-950 to-orange-900',
-                border: 'border-orange-800',
-                glow: 'hover:shadow-orange-900/30',
-                dot: 'bg-orange-500',
-                filter: d => d.deal_status === 'exploring_alternatives'
-            },
-            {
-                id: 'rumored',
-                label: '🟡 RUMORED',
-                subtitle: 'Market Buzz',
-                description: 'Unconfirmed reports, analyst speculation, and early-stage deal chatter',
-                bg: 'from-yellow-950 to-yellow-900/80',
-                border: 'border-yellow-800/60',
-                glow: 'hover:shadow-yellow-900/30',
-                dot: 'bg-yellow-500',
+                id: 'buy_opportunities',
+                emoji: '🟠',
+                label: 'BUY OPPORTUNITIES',
+                subtitle: 'Rumored & Available',
+                border: 'border-orange-700',
+                activeBg: 'bg-orange-950',
+                textColor: 'text-orange-400',
+                dotColor: 'bg-orange-500',
                 filter: d => d.deal_status === 'rumored'
             },
             {
-                id: 'potential',
-                label: '🟣 POTENTIAL TARGETS',
-                subtitle: 'On the Radar',
-                description: 'Companies flagged by FDA filings, patent activity, or sector screening as potential targets',
-                bg: 'from-purple-950 to-purple-900/80',
-                border: 'border-purple-800/60',
-                glow: 'hover:shadow-purple-900/30',
-                dot: 'bg-purple-500',
+                id: 'on_radar',
+                emoji: '🟣',
+                label: 'ON THE RADAR',
+                subtitle: 'Potential Targets',
+                border: 'border-purple-700',
+                activeBg: 'bg-purple-950',
+                textColor: 'text-purple-400',
+                dotColor: 'bg-purple-500',
                 filter: d => d.deal_status === 'potential_target'
             },
             {
-                id: 'completed',
-                label: '🔵 COMPLETED',
-                subtitle: 'Done Deals',
-                description: 'Finalized acquisitions and closed transactions for reference',
-                bg: 'from-blue-950 to-blue-900/80',
-                border: 'border-blue-800/60',
-                glow: 'hover:shadow-blue-900/30',
-                dot: 'bg-blue-500',
-                filter: d => d.deal_status === 'completed' && !(d.market_cap_b && d.market_cap_b >= 5)
+                id: 'closed_deals',
+                emoji: '✅',
+                label: 'CLOSED DEALS',
+                subtitle: 'Completed Reference',
+                border: 'border-blue-700',
+                activeBg: 'bg-blue-950',
+                textColor: 'text-blue-400',
+                dotColor: 'bg-blue-500',
+                filter: d => d.deal_status === 'completed'
             },
             {
-                id: 'fda_activity',
-                label: '💊 FDA ACTIVITY',
-                subtitle: 'Regulatory Signals',
-                description: '510(k) clearances and device registrations — ownership changes signal M&A',
-                bg: 'from-emerald-950 to-emerald-900/80',
-                border: 'border-emerald-800/60',
-                glow: 'hover:shadow-emerald-900/30',
-                dot: 'bg-emerald-500',
-                filter: d => d.source_name && d.source_name.includes('FDA')
+                id: 'all',
+                emoji: '📋',
+                label: 'ALL',
+                subtitle: 'Everything',
+                border: 'border-slate-600',
+                activeBg: 'bg-slate-800',
+                textColor: 'text-slate-300',
+                dotColor: 'bg-slate-400',
+                filter: () => true
             }
         ];
 
-        const DEAL_TYPE_LABELS = {
-            acquisition: '🤝 Acquisition',
-            merger: '🔄 Merger',
-            divestiture: '✂️ Divestiture',
-            ipo_spinoff: '🚀 IPO/Spin-off',
+        const STATUS_BADGES = {
+            rumored: { bg: 'bg-yellow-500/15', text: 'text-yellow-400', label: 'Rumored' },
+            confirmed: { bg: 'bg-green-500/15', text: 'text-green-400', label: 'Confirmed' },
+            exploring_alternatives: { bg: 'bg-red-500/15', text: 'text-red-400', label: 'Exploring Alternatives' },
+            completed: { bg: 'bg-blue-500/15', text: 'text-blue-400', label: 'Completed' },
+            potential_target: { bg: 'bg-purple-500/15', text: 'text-purple-400', label: 'Potential Target' },
         };
 
-        const STATUS_COLORS = {
-            rumored: 'text-yellow-400',
-            confirmed: 'text-green-400',
-            exploring_alternatives: 'text-orange-400',
-            completed: 'text-blue-400',
-            potential_target: 'text-purple-400',
+        const DEAL_TYPES = {
+            acquisition: '🤝 Acquisition', merger: '🔄 Merger',
+            divestiture: '✂️ Divestiture', ipo_spinoff: '🚀 IPO/Spin-off',
         };
 
         // ═══════════════════════════════════════
-        // DATA LOADING
+        // DATA
         // ═══════════════════════════════════════
         async function loadAllData() {
             try {
@@ -197,161 +188,150 @@
                 const res = await fetch(url);
                 const data = await res.json();
                 ALL_DEALS = data.deals || [];
-            } catch (e) {
-                console.error('Load error:', e);
-            }
-            renderCategories();
+            } catch (e) { console.error('Load error:', e); }
             document.getElementById('totalCount').textContent = ALL_DEALS.length;
+            populateFilterDropdowns();
+            renderCategories();
+            renderDeals();
+        }
+
+        function populateFilterDropdowns() {
+            const subsectors = [...new Set(ALL_DEALS.map(d => d.subsector).filter(Boolean))].sort();
+            const sources = [...new Set(ALL_DEALS.map(d => d.source_name).filter(Boolean))].sort();
+
+            const subSel = document.getElementById('subsectorFilter');
+            const curSub = subSel.value;
+            subSel.innerHTML = '<option value="">All Subsectors</option>' + subsectors.map(s =>
+                `<option value="${s}">${s} (${ALL_DEALS.filter(d=>d.subsector===s).length})</option>`).join('');
+            subSel.value = curSub;
+
+            const srcSel = document.getElementById('sourceFilter');
+            const curSrc = srcSel.value;
+            srcSel.innerHTML = '<option value="">All Sources</option>' + sources.map(s =>
+                `<option value="${s}">${s} (${ALL_DEALS.filter(d=>d.source_name===s).length})</option>`).join('');
+            srcSel.value = curSrc;
         }
 
         // ═══════════════════════════════════════
-        // CATEGORY CARDS
+        // CATEGORIES
         // ═══════════════════════════════════════
-        function getCategoryDeals(cat) {
-            return ALL_DEALS.filter(cat.filter);
-        }
-
         function renderCategories() {
             const grid = document.getElementById('categoryGrid');
             grid.innerHTML = CATEGORIES.map(cat => {
-                const deals = getCategoryDeals(cat);
-                const count = deals.length;
-                if (count === 0 && cat.id !== 'red_alert') return ''; // Always show red alert even if empty
-
-                // Top 3 company names for preview
-                const preview = deals.slice(0, 3).map(d => escHtml(d.name)).join(', ');
-                const more = count > 3 ? ` +${count - 3} more` : '';
-
+                const count = ALL_DEALS.filter(cat.filter).length;
+                const isActive = activeCategory === cat.id;
                 return `
-                <div class="cat-card bg-gradient-to-br ${cat.bg} rounded-xl p-5 border ${cat.border} ${cat.glow}" onclick="openCategory('${cat.id}')">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="text-lg font-bold">${cat.label}</span>
-                        <div class="flex items-center gap-2">
-                            ${cat.id === 'red_alert' && count > 0 ? '<span class="pulse-dot w-2 h-2 rounded-full bg-red-500 inline-block"></span>' : ''}
-                            <span class="text-2xl font-extrabold">${count}</span>
+                <div class="cat-card rounded-xl p-3 border ${isActive ? cat.border + ' ' + cat.activeBg : 'border-slate-800 bg-slate-900'} ${cat.textColor}"
+                     onclick="selectCategory('${cat.id}')">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase tracking-wide">${cat.emoji} ${cat.label}</span>
+                        <div class="flex items-center gap-1.5">
+                            ${cat.pulse && count > 0 ? '<span class="pulse-dot w-1.5 h-1.5 rounded-full ' + cat.dotColor + ' inline-block"></span>' : ''}
+                            <span class="text-lg font-extrabold">${count}</span>
                         </div>
                     </div>
-                    <p class="text-sm font-semibold text-slate-300 mb-1">${cat.subtitle}</p>
-                    <p class="text-xs text-slate-400 mb-3">${cat.description}</p>
-                    ${count > 0 ? `<p class="text-xs text-slate-500 truncate-1">${preview}${more ? `<span class="text-slate-600">${more}</span>` : ''}</p>` : '<p class="text-xs text-slate-600 italic">No targets currently</p>'}
+                    <p class="text-xs text-slate-500 mt-0.5">${cat.subtitle}</p>
                 </div>`;
             }).join('');
         }
 
-        // ═══════════════════════════════════════
-        // DEAL PANEL (expanded list)
-        // ═══════════════════════════════════════
-        function openCategory(catId) {
-            currentCategory = CATEGORIES.find(c => c.id === catId);
-            if (!currentCategory) return;
-
-            document.getElementById('searchResults').classList.add('hidden');
-            const panel = document.getElementById('dealPanel');
-            panel.classList.remove('hidden');
-            document.getElementById('panelTitle').textContent = `${currentCategory.label} — ${currentCategory.subtitle}`;
-
-            // Populate subsector filter
-            const deals = getCategoryDeals(currentCategory);
-            const subsectors = [...new Set(deals.map(d => d.subsector).filter(Boolean))].sort();
-            const sel = document.getElementById('panelSubsector');
-            sel.innerHTML = '<option value="">All Subsectors</option>' + subsectors.map(s => `<option value="${s}">${s}</option>`).join('');
-
-            renderDealList(deals);
-            panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        function selectCategory(catId) {
+            activeCategory = activeCategory === catId ? null : catId;
+            renderCategories();
+            renderDeals();
         }
 
-        function closePanel() {
-            document.getElementById('dealPanel').classList.add('hidden');
-            currentCategory = null;
-        }
+        // ═══════════════════════════════════════
+        // FILTERING + RENDERING
+        // ═══════════════════════════════════════
+        function getFilteredDeals() {
+            const q = document.getElementById('searchInput').value.trim().toLowerCase();
+            const subsector = document.getElementById('subsectorFilter').value;
+            const source = document.getElementById('sourceFilter').value;
+            const minCap = parseFloat(document.getElementById('minCap').value) || null;
+            const maxCap = parseFloat(document.getElementById('maxCap').value) || null;
+            const sort = document.getElementById('sortSelect').value;
 
-        function renderDealList(deals) {
-            const subsector = document.getElementById('panelSubsector').value;
-            const sort = document.getElementById('panelSort').value;
+            const catFilter = activeCategory ? CATEGORIES.find(c => c.id === activeCategory)?.filter : null;
 
-            let filtered = deals;
-            if (subsector) filtered = filtered.filter(d => d.subsector === subsector);
-
-            filtered.sort((a, b) => {
-                if (sort === 'name') return (a.name || '').localeCompare(b.name || '');
-                if (sort === 'market_cap_b') return (b.market_cap_b || 0) - (a.market_cap_b || 0);
-                return (b[sort] || '').localeCompare(a[sort] || '');
+            let filtered = ALL_DEALS.filter(d => {
+                if (catFilter && !catFilter(d)) return false;
+                if (q && !`${d.name} ${d.ticker||''} ${d.subsector||''} ${d.summary||''} ${d.source_name||''}`.toLowerCase().includes(q)) return false;
+                if (subsector && d.subsector !== subsector) return false;
+                if (source && d.source_name !== source) return false;
+                if (minCap && (!d.market_cap_b || d.market_cap_b < minCap)) return false;
+                if (maxCap && (!d.market_cap_b || d.market_cap_b > maxCap)) return false;
+                return true;
             });
 
-            document.getElementById('panelCount').textContent = `${filtered.length} target${filtered.length !== 1 ? 's' : ''}`;
-            document.getElementById('dealList').innerHTML = filtered.length === 0
-                ? '<div class="px-6 py-8 text-center text-slate-500">No deals match your filters</div>'
-                : filtered.map(renderDealRow).join('');
+            filtered.sort((a, b) => {
+                if (sort === 'name') return (a.name||'').localeCompare(b.name||'');
+                if (sort === 'market_cap_b') return (b.market_cap_b||0) - (a.market_cap_b||0);
+                return (b[sort]||'').localeCompare(a[sort]||'');
+            });
+
+            return filtered;
         }
 
-        function renderDealRow(deal) {
-            const capStr = deal.market_cap_b ? `$${deal.market_cap_b}B` : '';
-            const ticker = deal.ticker ? `<span class="bg-slate-700 text-slate-300 text-xs px-1.5 py-0.5 rounded font-mono">${escHtml(deal.ticker)}</span>` : '';
-            const statusColor = STATUS_COLORS[deal.deal_status] || 'text-slate-400';
-            const statusLabel = (deal.deal_status || '').replace(/_/g, ' ');
-            const dt = DEAL_TYPE_LABELS[deal.deal_type] || deal.deal_type || '';
-            const updated = deal.last_updated ? new Date(deal.last_updated).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
-            const source = deal.source_name || '';
+        function renderDeals() {
+            const deals = getFilteredDeals();
+            const cat = activeCategory ? CATEGORIES.find(c => c.id === activeCategory) : null;
 
-            return `
-            <div class="deal-row px-6 py-3.5 flex items-start gap-4">
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="font-semibold text-sm">${escHtml(deal.name)}</span>
-                        ${ticker}
-                        ${capStr ? `<span class="text-xs text-emerald-400 font-medium">${capStr}</span>` : ''}
+            document.getElementById('activeCategory').textContent = cat ? `${cat.emoji} ${cat.label}` : 'All Targets';
+            document.getElementById('resultCount').textContent = `· ${deals.length} result${deals.length !== 1 ? 's' : ''}`;
+
+            const hasFilters = activeCategory || document.getElementById('searchInput').value || document.getElementById('subsectorFilter').value || document.getElementById('sourceFilter').value || document.getElementById('minCap').value || document.getElementById('maxCap').value;
+            document.getElementById('clearFilters').classList.toggle('hidden', !hasFilters);
+
+            if (deals.length === 0) {
+                document.getElementById('dealRows').innerHTML = '<div class="px-6 py-12 text-center text-slate-500">No targets match your criteria</div>';
+                return;
+            }
+
+            document.getElementById('dealRows').innerHTML = deals.map(deal => {
+                const st = STATUS_BADGES[deal.deal_status] || STATUS_BADGES.rumored;
+                const dt = DEAL_TYPES[deal.deal_type] || deal.deal_type || '';
+                const capStr = deal.market_cap_b ? `<span class="text-emerald-400 font-semibold">$${deal.market_cap_b}B</span>` : '';
+                const ticker = deal.ticker ? `<span class="bg-slate-700/80 text-slate-300 text-xs px-1.5 py-0.5 rounded font-mono">${esc(deal.ticker)}</span>` : '';
+                const updated = deal.last_updated ? new Date(deal.last_updated).toLocaleDateString('en-US', {month:'short',day:'numeric'}) : '';
+                const source = deal.source_name || '';
+
+                return `
+                <div class="deal-row px-5 py-3 flex items-start gap-4">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 flex-wrap mb-0.5">
+                            <span class="font-semibold text-sm leading-tight">${esc(deal.name)}</span>
+                            ${ticker} ${capStr}
+                        </div>
+                        <p class="text-xs text-slate-400 truncate-2 mb-1.5">${esc(deal.summary||'')}</p>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="${st.bg} ${st.text} text-xs px-2 py-0.5 rounded-full font-medium">${st.label}</span>
+                            <span class="text-xs text-slate-500">${dt}</span>
+                            ${deal.subsector ? `<span class="bg-emerald-500/10 text-emerald-500 text-xs px-2 py-0.5 rounded-full">${esc(deal.subsector)}</span>` : ''}
+                        </div>
                     </div>
-                    <p class="text-xs text-slate-400 truncate-1">${escHtml(deal.summary || '')}</p>
-                </div>
-                <div class="flex-shrink-0 text-right space-y-1">
-                    <div class="flex items-center gap-2 justify-end">
-                        <span class="text-xs ${statusColor} font-medium capitalize">${statusLabel}</span>
-                        ${deal.subsector ? `<span class="bg-slate-800 text-slate-400 text-xs px-1.5 py-0.5 rounded">${escHtml(deal.subsector)}</span>` : ''}
+                    <div class="flex-shrink-0 text-right space-y-1 pt-0.5">
+                        <div class="text-xs text-slate-600">${source}</div>
+                        <div class="text-xs text-slate-600">${updated}</div>
+                        ${deal.source_url ? `<a href="${esc(deal.source_url)}" target="_blank" rel="noopener" class="text-xs text-emerald-600 hover:text-emerald-400">View source ↗</a>` : ''}
                     </div>
-                    <div class="flex items-center gap-2 justify-end text-xs text-slate-600">
-                        <span>${dt}</span>
-                        <span>·</span>
-                        <span>${updated}</span>
-                        ${deal.source_url ? `<a href="${escHtml(deal.source_url)}" target="_blank" class="text-emerald-600 hover:text-emerald-400">↗</a>` : ''}
-                    </div>
-                </div>
-            </div>`;
+                </div>`;
+            }).join('');
         }
 
-        // Panel filter listeners
-        document.getElementById('panelSubsector').addEventListener('change', () => {
-            if (currentCategory) renderDealList(getCategoryDeals(currentCategory));
-        });
-        document.getElementById('panelSort').addEventListener('change', () => {
-            if (currentCategory) renderDealList(getCategoryDeals(currentCategory));
-        });
-
-        // ═══════════════════════════════════════
-        // GLOBAL SEARCH
-        // ═══════════════════════════════════════
-        let searchTimer;
-        document.getElementById('globalSearch').addEventListener('input', (e) => {
-            clearTimeout(searchTimer);
-            const q = e.target.value.trim().toLowerCase();
-            if (!q) { clearSearch(); return; }
-            searchTimer = setTimeout(() => {
-                const results = ALL_DEALS.filter(d =>
-                    `${d.name} ${d.ticker || ''} ${d.subsector || ''} ${d.summary || ''} ${d.source_name || ''}`.toLowerCase().includes(q)
-                );
-                document.getElementById('dealPanel').classList.add('hidden');
-                const panel = document.getElementById('searchResults');
-                panel.classList.remove('hidden');
-                document.getElementById('searchCount').textContent = `${results.length} result${results.length !== 1 ? 's' : ''}`;
-                document.getElementById('searchList').innerHTML = results.length === 0
-                    ? '<div class="px-6 py-8 text-center text-slate-500">No results</div>'
-                    : results.map(renderDealRow).join('');
-            }, 300);
-        });
-
-        function clearSearch() {
-            document.getElementById('globalSearch').value = '';
-            document.getElementById('searchResults').classList.add('hidden');
+        function resetAll() {
+            activeCategory = null;
+            document.getElementById('searchInput').value = '';
+            document.getElementById('subsectorFilter').value = '';
+            document.getElementById('sourceFilter').value = '';
+            document.getElementById('minCap').value = '';
+            document.getElementById('maxCap').value = '';
+            document.getElementById('sortSelect').value = 'last_updated';
+            renderCategories();
+            renderDeals();
         }
+
+        function esc(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
 
         // ═══════════════════════════════════════
         // REFRESH
@@ -360,36 +340,24 @@
             const btn = document.getElementById('refreshBtn');
             const icon = document.getElementById('refreshIcon');
             const txt = document.getElementById('refreshText');
-            btn.disabled = true;
-            icon.classList.add('spinner');
-            txt.textContent = 'Refreshing...';
+            btn.disabled = true; icon.classList.add('spinner'); txt.textContent = 'Refreshing...';
             try {
-                if (!STATIC_MODE) {
-                    await fetch('/api/refresh', { method: 'POST' });
-                    await new Promise(r => setTimeout(r, 8000));
-                }
+                if (!STATIC_MODE) { await fetch('/api/refresh',{method:'POST'}); await new Promise(r=>setTimeout(r,8000)); }
                 await loadAllData();
                 document.getElementById('lastUpdate').textContent = 'Updated ' + new Date().toLocaleTimeString();
-                if (currentCategory) openCategory(currentCategory.id);
-            } catch (e) {
-                console.error('Refresh error:', e);
-            } finally {
-                btn.disabled = false;
-                icon.classList.remove('spinner');
-                txt.textContent = 'Refresh';
-            }
+            } catch(e) { console.error(e); }
+            finally { btn.disabled = false; icon.classList.remove('spinner'); txt.textContent = 'Refresh'; }
         }
 
-        function escHtml(s) {
-            const d = document.createElement('div');
-            d.textContent = s || '';
-            return d.innerHTML;
-        }
+        // ═══════════════════════════════════════
+        // LISTENERS
+        // ═══════════════════════════════════════
+        let debounce;
+        document.getElementById('searchInput').addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(renderDeals, 300); });
+        ['subsectorFilter','sourceFilter','sortSelect'].forEach(id => document.getElementById(id).addEventListener('change', renderDeals));
+        ['minCap','maxCap'].forEach(id => document.getElementById(id).addEventListener('change', renderDeals));
 
-        // Auto-refresh (live mode)
         if (!STATIC_MODE) setInterval(loadAllData, 60000);
-
-        // Init
         loadAllData();
     </script>
 </body>
