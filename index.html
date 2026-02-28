@@ -1,364 +1,859 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedTech M&A Intelligence</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .cat-card { transition: transform 0.15s, box-shadow 0.15s; cursor: pointer; }
-        .cat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(0,0,0,0.4); }
-        .cat-card.active { ring: 2px; }
-        .deal-row { transition: background-color 0.1s; }
-        .deal-row:hover { background-color: rgba(255,255,255,0.05); }
-        .slide-down { animation: slideDown 0.2s ease-out; }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-        .truncate-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .spinner { animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .pulse-dot { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedTech M&A Intelligence</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+    .scrollbar-thin::-webkit-scrollbar-track { background: #1e293b; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    .slide-in { animation: slideIn 0.3s ease-out; }
+    @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    .fade-in { animation: fadeIn 0.2s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .status-rumored { background: #854d0e; color: #fef08a; }
+    .status-confirmed { background: #14532d; color: #86efac; }
+    .status-exploring_alternatives { background: #7f1d1d; color: #fca5a5; }
+    .status-completed { background: #1e3a8a; color: #93c5fd; }
+    .status-potential_target { background: #581c87; color: #e9d5ff; }
+    .category-btn.active { ring: 2px; ring-color: #10b981; }
+  </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen">
+  <!-- Header -->
+  <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-emerald-400">🔬 MedTech M&A Intelligence</h1>
+        <p class="text-slate-400 text-sm"><span id="totalCount">0</span> targets tracked · Finding acquisition opportunities</p>
+      </div>
+      <button id="refreshBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <span>Refresh</span>
+      </button>
+    </div>
+  </header>
 
-    <!-- Header -->
-    <header class="border-b border-slate-800 bg-slate-950/90 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl font-extrabold tracking-tight">🔬 MedTech M&A Intelligence</h1>
-                <p class="text-slate-500 text-xs mt-0.5"><span id="totalCount">-</span> targets tracked · Finding acquisition opportunities</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <span id="lastUpdate" class="text-xs text-slate-600"></span>
-                <button id="refreshBtn" onclick="refreshData()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition">
-                    <svg id="refreshIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                    <span id="refreshText">Refresh</span>
-                </button>
-            </div>
+  <!-- Category Tiles -->
+  <div class="bg-slate-900 border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 py-3 overflow-x-auto">
+      <div class="flex gap-3 min-w-max" id="categoryTiles">
+        <button data-category="red-alert" class="category-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-red-900/50 flex items-center gap-2 transition-all">
+          <span class="text-red-400">🔴</span> <span class="font-medium">RED ALERT</span>
+          <span class="bg-red-900/50 text-red-300 text-xs px-2 py-0.5 rounded-full" data-count="red-alert">0</span>
+        </button>
+        <button data-category="buy-opp" class="category-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-orange-900/50 flex items-center gap-2 transition-all">
+          <span class="text-orange-400">🟠</span> <span class="font-medium">BUY OPPORTUNITIES</span>
+          <span class="bg-orange-900/50 text-orange-300 text-xs px-2 py-0.5 rounded-full" data-count="buy-opp">0</span>
+        </button>
+        <button data-category="on-radar" class="category-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-purple-900/50 flex items-center gap-2 transition-all">
+          <span class="text-purple-400">🟣</span> <span class="font-medium">ON THE RADAR</span>
+          <span class="bg-purple-900/50 text-purple-300 text-xs px-2 py-0.5 rounded-full" data-count="on-radar">0</span>
+        </button>
+        <button data-category="closed" class="category-btn px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-blue-900/50 flex items-center gap-2 transition-all">
+          <span class="text-blue-400">✅</span> <span class="font-medium">CLOSED DEALS</span>
+          <span class="bg-blue-900/50 text-blue-300 text-xs px-2 py-0.5 rounded-full" data-count="closed">0</span>
+        </button>
+        <button data-category="all" class="category-btn active px-4 py-2 rounded-lg bg-emerald-900/30 hover:bg-emerald-900/50 border border-emerald-700/50 flex items-center gap-2 transition-all">
+          <span class="text-emerald-400">📋</span> <span class="font-medium">ALL</span>
+          <span class="bg-emerald-900/50 text-emerald-300 text-xs px-2 py-0.5 rounded-full" data-count="all">0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="bg-slate-900/50 border-b border-slate-800 py-3">
+    <div class="max-w-7xl mx-auto px-4 flex flex-wrap gap-3 items-center">
+      <div class="relative flex-1 min-w-[200px]">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <input type="text" id="searchInput" placeholder="Search name, ticker, subsector..." class="w-full bg-slate-800 border border-slate-700 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-emerald-500">
+      </div>
+      <select id="subsectorFilter" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+        <option value="">All Subsectors</option>
+      </select>
+      <select id="sourceFilter" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+        <option value="">All Sources</option>
+      </select>
+      <div class="flex items-center gap-2">
+        <input type="number" id="minCap" placeholder="Min $B" class="w-20 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+        <span class="text-slate-500">-</span>
+        <input type="number" id="maxCap" placeholder="Max $B" class="w-20 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+      </div>
+      <select id="sortOrder" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-emerald-500">
+        <option value="last_updated">Latest Updated</option>
+        <option value="first_seen">Newest Found</option>
+        <option value="market_cap">Market Cap ↓</option>
+        <option value="name">Name A-Z</option>
+      </select>
+      <button id="clearFilters" class="text-sm text-emerald-400 hover:text-emerald-300 hidden">Clear all filters</button>
+    </div>
+  </div>
+
+  <!-- Deal List -->
+  <main class="max-w-7xl mx-auto px-4 py-4">
+    <div id="dealList" class="space-y-2"></div>
+    <div id="noResults" class="text-center py-12 text-slate-500 hidden">
+      <p class="text-lg">No deals match your filters</p>
+      <button id="clearFiltersEmpty" class="text-emerald-400 hover:text-emerald-300 mt-2">Clear filters</button>
+    </div>
+  </main>
+
+  <!-- Detail Panel Overlay -->
+  <div id="detailOverlay" class="fixed inset-0 bg-black/60 z-50 hidden"></div>
+
+  <!-- Detail Panel -->
+  <aside id="detailPanel" class="fixed top-0 right-0 h-full w-full max-w-xl bg-slate-900 border-l border-slate-800 z-50 transform translate-x-full overflow-hidden flex flex-col">
+    <div class="p-4 border-b border-slate-800 flex items-start justify-between">
+      <div>
+        <h2 id="detailCompany" class="text-xl font-bold text-white"></h2>
+        <div class="flex items-center gap-2 mt-1">
+          <span id="detailTicker" class="bg-slate-700 text-slate-200 px-2 py-0.5 rounded text-sm font-mono"></span>
+          <span id="detailStatus" class="px-2 py-0.5 rounded text-xs font-medium"></span>
         </div>
-    </header>
+        <p id="detailCap" class="text-slate-400 text-sm mt-1"></p>
+        <p id="detailTypeSub" class="text-slate-500 text-sm"></p>
+      </div>
+      <button id="closeDetail" class="text-slate-400 hover:text-white p-1">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
 
-    <main class="max-w-7xl mx-auto px-4 py-6">
+    <!-- Tabs -->
+    <div class="border-b border-slate-800">
+      <div class="flex overflow-x-auto scrollbar-thin" id="detailTabs">
+        <button data-tab="overview" class="detail-tab active px-4 py-3 text-sm font-medium text-emerald-400 border-b-2 border-emerald-400 whitespace-nowrap">Overview</button>
+        <button data-tab="fda" class="detail-tab px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap">FDA</button>
+        <button data-tab="sec" class="detail-tab px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap">SEC Filings</button>
+        <button data-tab="patents" class="detail-tab px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap">Patents</button>
+        <button data-tab="contracts" class="detail-tab px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap">Contracts</button>
+        <button data-tab="trials" class="detail-tab px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap">Trials</button>
+        <button data-tab="financials" class="detail-tab px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap">Financials</button>
+        <button data-tab="news" class="detail-tab px-4 py-3 text-sm font-medium text-slate-400 hover:text-white whitespace-nowrap">News</button>
+      </div>
+    </div>
 
-        <!-- Category Tiles -->
-        <div id="categoryGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-6"></div>
+    <!-- Tab Content -->
+    <div id="detailContent" class="flex-1 overflow-y-auto p-4 scrollbar-thin"></div>
+  </aside>
 
-        <!-- Filter Bar -->
-        <div id="filterBar" class="bg-slate-900 rounded-xl border border-slate-800 p-4 mb-6">
-            <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
-                <div class="md:col-span-2">
-                    <input id="searchInput" type="text" placeholder="Search company, ticker, keyword..."
-                           class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+  <script>
+    // Configuration
+    const STATIC_MODE = !window.location.port;
+    const API_BASE = STATIC_MODE ? 'api' : '/api';
+    const API_URL = STATIC_MODE ? `${API_BASE}/deals.json` : `${API_BASE}/deals?limit=500`;
+    const REFRESH_URL = `${API_BASE}/refresh`;
+
+    // State
+    let ALL_DEALS = [];
+    let filteredDeals = [];
+    let activeCategory = 'all';
+    let activeFilters = { search: '', subsector: '', source: '', minCap: '', maxCap: '', sort: 'last_updated' };
+    let currentDeal = null;
+    let debounceTimer = null;
+
+    // DOM Elements
+    const dealList = document.getElementById('dealList');
+    const noResults = document.getElementById('noResults');
+    const detailOverlay = document.getElementById('detailOverlay');
+    const detailPanel = document.getElementById('detailPanel');
+    const detailContent = document.getElementById('detailContent');
+    const totalCount = document.getElementById('totalCount');
+
+    // Initialize
+    async function init() {
+      await loadDeals();
+      setupEventListeners();
+      if (!STATIC_MODE) {
+        setInterval(loadDeals, 60000);
+      }
+    }
+
+    async function loadDeals() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        ALL_DEALS = data.deals || [];
+        updateCounts();
+        applyFilters();
+      } catch (err) {
+        console.error('Failed to load deals:', err);
+      }
+    }
+
+    function updateCounts() {
+      totalCount.textContent = ALL_DEALS.length;
+      
+      const redAlert = ALL_DEALS.filter(d => d.deal_status === 'exploring_alternatives' || (d.deal_status === 'confirmed' && d.market_cap_b >= 2)).length;
+      const buyOpp = ALL_DEALS.filter(d => d.deal_status === 'rumored').length;
+      const onRadar = ALL_DEALS.filter(d => d.deal_status === 'potential_target').length;
+      const closed = ALL_DEALS.filter(d => d.deal_status === 'completed').length;
+      
+      document.querySelector('[data-count="red-alert"]').textContent = redAlert;
+      document.querySelector('[data-count="buy-opp"]').textContent = buyOpp;
+      document.querySelector('[data-count="on-radar"]').textContent = onRadar;
+      document.querySelector('[data-count="closed"]').textContent = closed;
+      document.querySelector('[data-count="all"]').textContent = ALL_DEALS.length;
+
+      // Populate dropdowns
+      const subsectors = [...new Set(ALL_DEALS.map(d => d.subsector).filter(Boolean))].sort();
+      const subsectorSelect = document.getElementById('subsectorFilter');
+      subsectorSelect.innerHTML = '<option value="">All Subsectors</option>' + 
+        subsectors.map(s => `<option value="${s}">${s}</option>`).join('');
+
+      const sources = [...new Set(ALL_DEALS.map(d => d.source_name).filter(Boolean))].sort();
+      const sourceSelect = document.getElementById('sourceFilter');
+      sourceSelect.innerHTML = '<option value="">All Sources</option>' + 
+        sources.map(s => `<option value="${s}">${s}</option>`).join('');
+    }
+
+    function applyFilters() {
+      filteredDeals = ALL_DEALS.filter(deal => {
+        // Category filter
+        if (activeCategory === 'red-alert') {
+          if (!(deal.deal_status === 'exploring_alternatives' || (deal.deal_status === 'confirmed' && deal.market_cap_b >= 2))) return false;
+        } else if (activeCategory === 'buy-opp') {
+          if (deal.deal_status !== 'rumored') return false;
+        } else if (activeCategory === 'on-radar') {
+          if (deal.deal_status !== 'potential_target') return false;
+        } else if (activeCategory === 'closed') {
+          if (deal.deal_status !== 'completed') return false;
+        }
+
+        // Search filter
+        if (activeFilters.search) {
+          const search = activeFilters.search.toLowerCase();
+          const match = deal.name?.toLowerCase().includes(search) ||
+            deal.ticker?.toLowerCase().includes(search) ||
+            deal.subsector?.toLowerCase().includes(search) ||
+            deal.summary?.toLowerCase().includes(search) ||
+            deal.source_name?.toLowerCase().includes(search);
+          if (!match) return false;
+        }
+
+        // Subsector filter
+        if (activeFilters.subsector && deal.subsector !== activeFilters.subsector) return false;
+
+        // Source filter
+        if (activeFilters.source && deal.source_name !== activeFilters.source) return false;
+
+        // Market cap filter
+        if (activeFilters.minCap && (!deal.market_cap_b || deal.market_cap_b < parseFloat(activeFilters.minCap))) return false;
+        if (activeFilters.maxCap && (!deal.market_cap_b || deal.market_cap_b > parseFloat(activeFilters.maxCap))) return false;
+
+        return true;
+      });
+
+      // Sort
+      filteredDeals.sort((a, b) => {
+        switch (activeFilters.sort) {
+          case 'first_seen': return new Date(b.first_seen) - new Date(a.first_seen);
+          case 'market_cap': return (b.market_cap_b || 0) - (a.market_cap_b || 0);
+          case 'name': return (a.name || '').localeCompare(b.name || '');
+          default: return new Date(b.last_updated) - new Date(a.last_updated);
+        }
+      });
+
+      renderDeals();
+      updateClearButton();
+    }
+
+    function renderDeals() {
+      if (filteredDeals.length === 0) {
+        dealList.classList.add('hidden');
+        noResults.classList.remove('hidden');
+        return;
+      }
+
+      dealList.classList.remove('hidden');
+      noResults.classList.add('hidden');
+
+      dealList.innerHTML = filteredDeals.map(deal => `
+        <div class="deal-row bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 rounded-lg p-4 cursor-pointer transition-all" data-id="${deal.id}">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold text-white">${deal.name}</span>
+                ${deal.ticker ? `<span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded text-xs font-mono">${deal.ticker}</span>` : ''}
+                ${deal.market_cap_b ? `<span class="text-emerald-400 text-sm">$${deal.market_cap_b}B</span>` : ''}
+              </div>
+              <p class="text-slate-400 text-sm mt-1 line-clamp-2">${deal.summary || 'No summary available'}</p>
+              <div class="flex items-center gap-2 mt-2 flex-wrap text-xs">
+                <span class="status-${deal.deal_status} px-2 py-0.5 rounded">${formatStatus(deal.deal_status)}</span>
+                <span class="text-slate-500">${deal.deal_type || ''}</span>
+                ${deal.subsector ? `<span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded">${deal.subsector}</span>` : ''}
+              </div>
+            </div>
+            <div class="text-right text-xs text-slate-500 shrink-0">
+              <p>${deal.source_name}</p>
+              <p>${formatDate(deal.first_seen)}</p>
+              ${deal.source_url ? `<a href="${deal.source_url}" target="_blank" class="text-emerald-400 hover:underline">View source ↗</a>` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Add click handlers
+      document.querySelectorAll('.deal-row').forEach(row => {
+        row.addEventListener('click', () => {
+          const deal = ALL_DEALS.find(d => d.id === parseInt(row.dataset.id));
+          if (deal) openDetailPanel(deal);
+        });
+      });
+    }
+
+    function formatStatus(status) {
+      const map = {
+        rumored: 'Rumored',
+        confirmed: 'Confirmed',
+        exploring_alternatives: 'Exploring Alternatives',
+        completed: 'Completed',
+        potential_target: 'Potential Target'
+      };
+      return map[status] || status;
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const date = new Date(dateStr);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function updateClearButton() {
+      const hasFilters = activeFilters.search || activeFilters.subsector || activeFilters.source || 
+                         activeFilters.minCap || activeFilters.maxCap || activeCategory !== 'all';
+      document.getElementById('clearFilters').classList.toggle('hidden', !hasFilters);
+    }
+
+    function clearAllFilters() {
+      activeCategory = 'all';
+      activeFilters = { search: '', subsector: '', source: '', minCap: '', maxCap: '', sort: 'last_updated' };
+      document.getElementById('searchInput').value = '';
+      document.getElementById('subsectorFilter').value = '';
+      document.getElementById('sourceFilter').value = '';
+      document.getElementById('minCap').value = '';
+      document.getElementById('maxCap').value = '';
+      document.getElementById('sortOrder').value = 'last_updated';
+      document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active', 'bg-emerald-900/30', 'border-emerald-700/50'));
+      document.querySelector('[data-category="all"]').classList.add('active', 'bg-emerald-900/30', 'border-emerald-700/50');
+      applyFilters();
+    }
+
+    function setupEventListeners() {
+      // Category buttons
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.category-btn').forEach(b => {
+            b.classList.remove('active', 'bg-emerald-900/30', 'border-emerald-700/50');
+          });
+          btn.classList.add('active', 'bg-emerald-900/30', 'border-emerald-700/50');
+          activeCategory = btn.dataset.category;
+          applyFilters();
+        });
+      });
+
+      // Search input
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          activeFilters.search = e.target.value;
+          applyFilters();
+        }, 300);
+      });
+
+      // Filter selects
+      document.getElementById('subsectorFilter').addEventListener('change', (e) => {
+        activeFilters.subsector = e.target.value;
+        applyFilters();
+      });
+      document.getElementById('sourceFilter').addEventListener('change', (e) => {
+        activeFilters.source = e.target.value;
+        applyFilters();
+      });
+      document.getElementById('minCap').addEventListener('input', (e) => {
+        activeFilters.minCap = e.target.value;
+        applyFilters();
+      });
+      document.getElementById('maxCap').addEventListener('input', (e) => {
+        activeFilters.maxCap = e.target.value;
+        applyFilters();
+      });
+      document.getElementById('sortOrder').addEventListener('change', (e) => {
+        activeFilters.sort = e.target.value;
+        applyFilters();
+      });
+
+      // Clear filters
+      document.getElementById('clearFilters').addEventListener('click', clearAllFilters);
+      document.getElementById('clearFiltersEmpty')?.addEventListener('click', clearAllFilters);
+
+      // Refresh button
+      document.getElementById('refreshBtn').addEventListener('click', async () => {
+        if (STATIC_MODE) {
+          await loadDeals();
+        } else {
+          try {
+            await fetch(REFRESH_URL, { method: 'POST' });
+            document.getElementById('refreshBtn').innerHTML = '<span class="animate-pulse">Refreshing...</span>';
+            setTimeout(async () => {
+              await loadDeals();
+              document.getElementById('refreshBtn').innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg><span>Refresh</span>';
+            }, 8000);
+          } catch (err) {
+            console.error('Refresh failed:', err);
+          }
+        }
+      });
+
+      // Detail panel
+      detailOverlay.addEventListener('click', closeDetailPanel);
+      document.getElementById('closeDetail').addEventListener('click', closeDetailPanel);
+
+      // Tab switching
+      document.querySelectorAll('.detail-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.detail-tab').forEach(t => {
+            t.classList.remove('active', 'text-emerald-400', 'border-b-2', 'border-emerald-400');
+            t.classList.add('text-slate-400');
+          });
+          tab.classList.add('active', 'text-emerald-400', 'border-b-2', 'border-emerald-400');
+          tab.classList.remove('text-slate-400');
+          loadTabContent(tab.dataset.tab);
+        });
+      });
+    }
+
+    function openDetailPanel(deal) {
+      currentDeal = deal;
+      
+      // Set header
+      document.getElementById('detailCompany').textContent = deal.name;
+      document.getElementById('detailTicker').textContent = deal.ticker || 'N/A';
+      document.getElementById('detailTicker').classList.toggle('hidden', !deal.ticker);
+      
+      const statusEl = document.getElementById('detailStatus');
+      statusEl.textContent = formatStatus(deal.deal_status);
+      statusEl.className = `px-2 py-0.5 rounded text-xs font-medium status-${deal.deal_status}`;
+      
+      document.getElementById('detailCap').textContent = deal.market_cap_b ? `$${deal.market_cap_b}B Market Cap` : 'Market Cap: Unknown';
+      document.getElementById('detailTypeSub').textContent = `${deal.deal_type || 'Unknown'} · ${deal.subsector || 'Unknown'}`;
+
+      // Show panel
+      detailOverlay.classList.remove('hidden');
+      detailPanel.classList.remove('translate-x-full');
+      detailPanel.classList.add('slide-in');
+
+      // Load first tab
+      loadTabContent('overview');
+    }
+
+    function closeDetailPanel() {
+      detailPanel.classList.add('translate-x-full');
+      detailPanel.classList.remove('slide-in');
+      setTimeout(() => {
+        detailOverlay.classList.add('hidden');
+        currentDeal = null;
+      }, 300);
+    }
+
+    async function loadTabContent(tab) {
+      if (!currentDeal) return;
+      
+      const companyName = currentDeal.name;
+      const ticker = currentDeal.ticker;
+      
+      let html = '';
+      
+      switch (tab) {
+        case 'overview':
+          html = renderOverview();
+          break;
+        case 'fda':
+          html = await renderFDA(companyName);
+          break;
+        case 'sec':
+          html = await renderSEC(companyName);
+          break;
+        case 'patents':
+          html = renderPatents(companyName);
+          break;
+        case 'contracts':
+          html = await renderContracts(companyName);
+          break;
+        case 'trials':
+          html = await renderTrials(companyName);
+          break;
+        case 'financials':
+          html = renderFinancials(companyName, ticker);
+          break;
+        case 'news':
+          html = renderNews(companyName);
+          break;
+      }
+      
+      detailContent.innerHTML = html;
+    }
+
+    function renderOverview() {
+      // Find all deals for this company (by name or ticker)
+      const companyDeals = ALL_DEALS.filter(d => 
+        d.name === currentDeal.name || 
+        (currentDeal.ticker && d.ticker === currentDeal.ticker)
+      );
+
+      if (companyDeals.length === 0) {
+        return '<p class="text-slate-500">No other entries found for this company.</p>';
+      }
+
+      return `
+        <div class="space-y-3">
+          <h3 class="font-semibold text-white">All Entries for ${currentDeal.name}</h3>
+          ${companyDeals.map(deal => `
+            <div class="bg-slate-800 rounded-lg p-3 border border-slate-700">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="status-${deal.deal_status} px-2 py-0.5 rounded text-xs">${formatStatus(deal.deal_status)}</span>
+                <span class="text-slate-400 text-xs">${deal.deal_type}</span>
+                <span class="text-slate-500 text-xs">${formatDate(deal.first_seen)}</span>
+              </div>
+              <p class="text-sm text-slate-300">${deal.summary || 'No summary'}</p>
+              ${deal.source_url ? `<a href="${deal.source_url}" target="_blank" class="text-emerald-400 text-xs hover:underline">${deal.source_name || 'View source'} ↗</a>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    async function renderFDA(companyName) {
+      detailContent.innerHTML = '<div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full"></div></div>';
+      
+      let html = '<div class="space-y-6">';
+      
+      // 510k
+      try {
+        const res = await fetch(`https://api.fda.gov/device/510k.json?search=applicant:"${encodeURIComponent(companyName)}"&limit=20`);
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          html += `<div><h4 class="font-medium text-white mb-2">510(k) Clearances (${data.results.length})</h4><div class="space-y-2 max-h-48 overflow-y-auto scrollbar-thin">`;
+          html += data.results.map(r => `
+            <div class="bg-slate-800 rounded p-2 text-sm">
+              <div class="flex justify-between"><span class="font-mono text-emerald-400">${r.k_number || 'N/A'}</span><span class="text-slate-500">${r.decision_date || ''}</span></div>
+              <p class="text-slate-300 truncate">${r.device_name || r.product_code || 'Unknown device'}</p>
+              <span class="text-xs text-slate-500">${r.product_code || ''}</span>
+            </div>
+          `).join('');
+          html += '</div></div>';
+        } else {
+          html += '<div class="bg-slate-800 rounded p-3 text-sm text-slate-400">No 510(k) clearances found</div>';
+        }
+      } catch (e) {
+        html += `<div class="bg-slate-800 rounded p-3 text-sm text-slate-400">Could not fetch 510(k) data</div>`;
+      }
+
+      // PMA
+      try {
+        const res = await fetch(`https://api.fda.gov/device/pma.json?search=applicant:"${encodeURIComponent(companyName)}"&limit=10`);
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          html += `<div><h4 class="font-medium text-white mb-2">PMA Approvals (${data.results.length})</h4><div class="space-y-2 max-h-32 overflow-y-auto scrollbar-thin">`;
+          html += data.results.map(r => `
+            <div class="bg-slate-800 rounded p-2 text-sm">
+              <div class="flex justify-between"><span class="font-mono text-purple-400">${r.pma_number || 'N/A'}</span><span class="text-slate-500">${r.decision_date || ''}</span></div>
+              <p class="text-slate-300 truncate">${r.device_name || 'Unknown device'}</p>
+            </div>
+          `).join('');
+          html += '</div></div>';
+        }
+      } catch (e) {}
+
+      // Recalls
+      try {
+        const res = await fetch(`https://api.fda.gov/device/recall.json?search=recalling_firm:"${encodeURIComponent(companyName)}"&limit=10`);
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          html += `<div><h4 class="font-medium text-white mb-2">Recalls (${data.results.length})</h4><div class="space-y-2 max-h-32 overflow-y-auto scrollbar-thin">`;
+          html += data.results.map(r => `
+            <div class="bg-slate-800 rounded p-2 text-sm">
+              <div class="flex justify-between"><span class="text-red-400">${r.recall_status || 'Recall'}</span><span class="text-slate-500">${r.recall_initiation_date || ''}</span></div>
+              <p class="text-slate-300 truncate">${r.product_description || 'Unknown product'}</p>
+            </div>
+          `).join('');
+          html += '</div></div>';
+        }
+      } catch (e) {}
+
+      // Adverse Events
+      try {
+        const res = await fetch(`https://api.fda.gov/device/event.json?search=manufacturer_d_name:"${encodeURIComponent(companyName)}"&limit=10&sort=date_received:desc`);
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          html += `<div><h4 class="font-medium text-white mb-2">Adverse Events (${data.results.length})</h4><div class="space-y-2 max-h-32 overflow-y-auto scrollbar-thin">`;
+          html += data.results.slice(0, 5).map(r => `
+            <div class="bg-slate-800 rounded p-2 text-sm">
+              <span class="text-slate-500">${r.date_received || ''}</span>
+              <p class="text-slate-300 truncate">${r.event_description || 'No description'}</p>
+            </div>
+          `).join('');
+          html += '</div></div>';
+        }
+      } catch (e) {}
+
+      // Manual search link
+      html += `<a href="https://www.fda.gov/medical-devices/device-approvals-clearnings-and-letters/search-fda-approval-letters" target="_blank" class="block mt-3 text-center text-emerald-400 hover:underline text-sm">Search FDA Database ↗</a>`;
+      html += '</div>';
+      
+      detailContent.innerHTML = html;
+      return html;
+    }
+
+    async function renderSEC(companyName) {
+      detailContent.innerHTML = '<div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full"></div></div>';
+      
+      let html = '<div class="space-y-4">';
+      
+      // SEC EDGAR search
+      const secSearchUrl = `https://www.sec.gov/cgi-bin/browse-edgar?company=${encodeURIComponent(companyName)}&CIK=&type=10-K&dateb=&owner=include&count=10&search_text=&action=getcompany`;
+      
+      try {
+        const res = await fetch(`https://efts.sec.gov/LATEST/search-index?q=%22${encodeURIComponent(companyName)}%22&forms=8-K,10-K,DEF+14A&dateRange=custom&startdt=2025-01-01&enddt=2026-12-31`, {
+          headers: { 'User-Agent': 'MedTech-MA-Tracker/1.0' }
+        });
+        const data = await res.json();
+        if (data.hits && data.hits.hits.length > 0) {
+          html += `<div><h4 class="font-medium text-white mb-2">Recent SEC Filings</h4><div class="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">`;
+          html += data.hits.hits.slice(0, 10).map(h => {
+            const fields = h._source;
+            return `
+              <div class="bg-slate-800 rounded p-2 text-sm">
+                <div class="flex justify-between"><span class="text-blue-400 font-mono">${fields.form || 'N/A'}</span><span class="text-slate-500">${fields.file_date || ''}</span></div>
+                <p class="text-slate-300 truncate">${fields.entity_name || companyName}</p>
+                <a href="https://www.sec.gov/Archives/edgar/data/${fields.cik || 0}/${fields.file_number || ''}" target="_blank" class="text-emerald-400 text-xs hover:underline">View Filing ↗</a>
+              </div>
+            `;
+          }).join('');
+          html += '</div></div>';
+        } else {
+          html += '<div class="bg-slate-800 rounded p-3 text-sm text-slate-400">No recent SEC filings found</div>';
+        }
+      } catch (e) {
+        html += '<div class="bg-slate-800 rounded p-3 text-sm text-slate-400">Could not fetch SEC filings</div>';
+      }
+
+      html += `<a href="${secSearchUrl}" target="_blank" class="block mt-3 text-center text-emerald-400 hover:underline text-sm">Search SEC EDGAR ↗</a>`;
+      html += '</div>';
+      
+      detailContent.innerHTML = html;
+    }
+
+    function renderPatents(companyName) {
+      const googlePatentsUrl = `https://patents.google.com/?assignee=${encodeURIComponent(companyName)}&sort=new`;
+      const usptoUrl = `https://assignment.uspto.gov/patent/index.html#/patent/search/resultAssignment?searchInput=${encodeURIComponent(companyName)}`;
+      
+      let html = `<div class="space-y-4">
+        <div class="bg-slate-800 rounded p-3">
+          <p class="text-sm text-slate-400 mb-3">Search patent databases for this company.</p>
+          <div class="space-y-2">
+            <a href="${googlePatentsUrl}" target="_blank" class="block bg-blue-900/50 hover:bg-blue-900 text-blue-300 px-4 py-2 rounded text-center text-sm transition-colors">🔍 Google Patents ↗</a>
+            <a href="${usptoUrl}" target="_blank" class="block bg-purple-900/50 hover:bg-purple-900 text-purple-300 px-4 py-2 rounded text-center text-sm transition-colors">🇺🇸 USPTO Assignments ↗</a>
+          </div>
+        </div>`;
+
+      // Try USPTO API
+      html += '<div id="patentsLoading" class="text-center py-4"><div class="animate-spin w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full mx-auto"></div></div>';
+      
+      fetch(`https://developer.uspto.gov/ibd-api/v1/application/grants?assigneeEntityName=${encodeURIComponent(companyName)}&rows=10&sort=patentIssueDate+desc`)
+        .then(res => res.json())
+        .then(data => {
+          const loading = document.getElementById('patentsLoading');
+          if (loading) loading.remove();
+          
+          if (data.response && data.response.docs && data.response.docs.length > 0) {
+            const container = document.getElementById('patentsResults') || document.createElement('div');
+            container.id = 'patentsResults';
+            container.className = 'space-y-2';
+            container.innerHTML = `<h4 class="font-medium text-white">USPTO Grants (${data.response.numFound})</h4>` + 
+              data.response.docs.slice(0, 5).map(d => `
+                <div class="bg-slate-800 rounded p-2 text-sm">
+                  <span class="font-mono text-emerald-400">${d.patentNumber || 'N/A'}</span>
+                  <p class="text-slate-300 truncate">${d.inventionTitle || 'Unknown'}</p>
+                  <span class="text-xs text-slate-500">${d.patentIssueDate || ''}</span>
                 </div>
-                <select id="subsectorFilter" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
-                    <option value="">All Subsectors</option>
-                </select>
-                <select id="sourceFilter" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
-                    <option value="">All Sources</option>
-                </select>
-                <div class="flex gap-2">
-                    <input id="minCap" type="number" placeholder="Min $B" step="0.1" min="0"
-                           class="w-1/2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
-                    <input id="maxCap" type="number" placeholder="Max $B" step="0.1" min="0"
-                           class="w-1/2 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+              `).join('');
+            
+            const existing = document.getElementById('patentsResults');
+            if (!existing) {
+              html = html.replace('</div>', container.outerHTML + '</div>');
+              detailContent.innerHTML = html;
+            }
+          }
+        })
+        .catch(() => {
+          const loading = document.getElementById('patentsLoading');
+          if (loading) loading.remove();
+        });
+
+      return html + '</div>';
+    }
+
+    async function renderContracts(companyName) {
+      detailContent.innerHTML = '<div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full"></div></div>';
+      
+      let html = '<div class="space-y-4">';
+      
+      try {
+        const res = await fetch('https://api.usaspending.gov/api/v2/search/spending_by_award/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            filters: { keywords: [companyName], award_type_codes: ['A', 'B', 'C', 'D'] },
+            fields: ['Award ID', 'Recipient Name', 'Award Amount', 'Description', 'Start Date', 'End Date', 'Awarding Agency'],
+            limit: 20,
+            order: 'desc',
+            sort: 'Award Amount'
+          })
+        });
+        const data = await res.json();
+        
+        if (data.results && data.results.length > 0) {
+          html += `<div><h4 class="font-medium text-white mb-2">Federal Contracts (${data.results.length})</h4><div class="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">`;
+          html += data.results.slice(0, 10).map(r => `
+            <div class="bg-slate-800 rounded p-2 text-sm">
+              <div class="flex justify-between items-start">
+                <span class="text-emerald-400 font-medium">$${parseInt(r.award_amount || 0).toLocaleString()}</span>
+                <span class="text-slate-500 text-xs">${r.awarding_agency || 'N/A'}</span>
+              </div>
+              <p class="text-slate-300 truncate">${r.description || 'No description'}</p>
+              <span class="text-xs text-slate-500">${r.period_of_performance_start_date || ''} - ${r.period_of_performance_current_end_date || ''}</span>
+            </div>
+          `).join('');
+          html += '</div></div>';
+        } else {
+          html += '<div class="bg-slate-800 rounded p-3 text-sm text-slate-400">No federal contracts found</div>';
+        }
+      } catch (e) {
+        html += '<div class="bg-slate-800 rounded p-3 text-sm text-slate-400">Could not fetch contract data</div>';
+      }
+
+      html += `<a href="https://www.usaspending.gov/search" target="_blank" class="block mt-3 text-center text-emerald-400 hover:underline text-sm">Search USAspending.gov ↗</a>`;
+      html += '</div>';
+      
+      detailContent.innerHTML = html;
+    }
+
+    async function renderTrials(companyName) {
+      detailContent.innerHTML = '<div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full"></div></div>';
+      
+      let html = '<div class="space-y-4">';
+      
+      try {
+        const res = await fetch(`https://clinicaltrials.gov/api/v2/studies?query.spons=${encodeURIComponent(companyName)}&pageSize=10&sort=LastUpdatePostDate:desc`);
+        const data = await res.json();
+        
+        if (data.studies && data.studies.length > 0) {
+          html += `<div><h4 class="font-medium text-white mb-2">Clinical Trials (${data.totalCount})</h4><div class="space-y-2 max-h-64 overflow-y-auto scrollbar-thin">`;
+          html += data.studies.slice(0, 10).map(s => {
+            const proto = s.protocolSection || {};
+            const id = proto.identificationModule || {};
+            const status = proto.statusModule || {};
+            return `
+              <div class="bg-slate-800 rounded p-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="font-mono text-emerald-400">${id.nctId || 'N/A'}</span>
+                  <span class="text-xs ${status.overallStatus === 'RECRUITING' ? 'text-green-400' : 'text-slate-400'}">${status.overallStatus || 'Unknown'}</span>
                 </div>
-                <select id="sortSelect" class="bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-100 focus:outline-none focus:border-emerald-500">
-                    <option value="last_updated">Latest Updated</option>
-                    <option value="first_seen">Newest Found</option>
-                    <option value="market_cap_b">Market Cap ↓</option>
-                    <option value="name">Name A-Z</option>
-                </select>
-            </div>
+                <p class="text-slate-300 truncate">${id.briefTitle || 'Unknown'}</p>
+                ${proto.designModule ? `<span class="text-xs text-slate-500">Phase: ${proto.designModule.phases?.[0] || 'N/A'}</span>` : ''}
+              </div>
+            `;
+          }).join('');
+          html += '</div></div>';
+        } else {
+          html += '<div class="bg-slate-800 rounded p-3 text-sm text-slate-400">No clinical trials found</div>';
+        }
+      } catch (e) {
+        html += '<div class="bg-slate-800 rounded p-3 text-sm text-slate-400">Could not fetch trials data</div>';
+      }
+
+      html += `<a href="https://clinicaltrials.gov/search?spons=${encodeURIComponent(companyName)}" target="_blank" class="block mt-3 text-center text-emerald-400 hover:underline text-sm">Search ClinicalTrials.gov ↗</a>`;
+      html += '</div>';
+      
+      detailContent.innerHTML = html;
+    }
+
+    function renderFinancials(companyName, ticker) {
+      let html = '<div class="space-y-4">';
+      
+      if (ticker) {
+        html += `<div class="grid grid-cols-2 gap-2">
+          <a href="https://finance.yahoo.com/quote/${ticker}" target="_blank" class="bg-emerald-900/50 hover:bg-emerald-900 text-emerald-300 px-4 py-2 rounded text-center text-sm transition-colors">📈 Yahoo Finance</a>
+          <a href="https://finviz.com/quote.ashx?t=${ticker}" target="_blank" class="bg-blue-900/50 hover:bg-blue-900 text-blue-300 px-4 py-2 rounded text-center text-sm transition-colors">📊 Finviz</a>
+          <a href="https://www.macrotrends.net/stocks/charts/${ticker}" target="_blank" class="bg-purple-900/50 hover:bg-purple-900 text-purple-300 px-4 py-2 rounded text-center text-sm transition-colors">📉 Macrotrends</a>
+          <a href="https://www.sec.gov/cgi-bin/browse-edgar?company=${encodeURIComponent(companyName)}&CIK=&type=10-K&dateb=&owner=include&count=10&search_text=&action=getcompany" target="_blank" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 py-2 rounded text-center text-sm transition-colors">📄 SEC EDGAR</a>
+        </div>`;
+      } else {
+        html += `
+          <div class="bg-slate-800 rounded p-3 text-sm text-slate-400">
+            <p class="mb-2">No ticker available for this company.</p>
+          </div>
+          <a href="https://www.sec.gov/cgi-bin/browse-edgar?company=${encodeURIComponent(companyName)}&CIK=&type=10-K&dateb=&owner=include&count=10&search_text=&action=getcompany" target="_blank" class="block text-center text-emerald-400 hover:underline text-sm">Search SEC EDGAR ↗</a>
+        `;
+      }
+
+      // SEC filings section
+      html += `
+        <div class="bg-slate-800 rounded p-3">
+          <h4 class="font-medium text-white mb-2">SEC Filings</h4>
+          <p class="text-sm text-slate-400 mb-2">Search for 10-K, 10-Q, 8-K, and DEF 14A filings.</p>
+          <a href="https://www.sec.gov/cgi-bin/browse-edgar?company=${encodeURIComponent(companyName)}&CIK=&type=10-K&dateb=&owner=include&count=10&search_text=&action=getcompany" target="_blank" class="block bg-blue-900/50 hover:bg-blue-900 text-blue-300 px-4 py-2 rounded text-center text-sm transition-colors">Search SEC EDGAR ↗</a>
         </div>
+      `;
 
-        <!-- Results Header -->
-        <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-                <span id="activeCategory" class="text-sm font-semibold text-slate-300"></span>
-                <span id="resultCount" class="text-xs text-slate-500"></span>
-            </div>
-            <button id="clearFilters" onclick="resetAll()" class="text-xs text-slate-500 hover:text-slate-300 hidden">Clear all filters</button>
-        </div>
+      html += '</div>';
+      return html;
+    }
 
-        <!-- Deal List -->
-        <div id="dealList" class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
-            <div class="divide-y divide-slate-800/50" id="dealRows">
-                <div class="px-6 py-12 text-center text-slate-500">Loading...</div>
-            </div>
-        </div>
+    function renderNews(companyName) {
+      const googleNewsUrl = `https://news.google.com/search?q=${encodeURIComponent(companyName + ' medtech acquisition')}`;
+      
+      let html = '<div class="space-y-4">';
+      
+      // Show entries from our data
+      const companyDeals = ALL_DEALS.filter(d => 
+        d.name === currentDeal.name || 
+        (currentDeal.ticker && d.ticker === currentDeal.ticker)
+      );
+      
+      if (companyDeals.length > 0) {
+        html += '<div><h4 class="font-medium text-white mb-2">From Our Sources</h4><div class="space-y-2">';
+        companyDeals.forEach(deal => {
+          if (deal.source_url) {
+            html += `
+              <div class="bg-slate-800 rounded p-2 text-sm">
+                <p class="text-slate-300">${deal.summary || 'No summary'}</p>
+                <a href="${deal.source_url}" target="_blank" class="text-emerald-400 text-xs hover:underline">${deal.source_name || 'View source'} ↗</a>
+                <span class="text-slate-500 text-xs ml-2">${formatDate(deal.first_seen)}</span>
+              </div>
+            `;
+          }
+        });
+        html += '</div></div>';
+      }
 
-    </main>
+      html += `
+        <a href="${googleNewsUrl}" target="_blank" class="block bg-orange-900/50 hover:bg-orange-900 text-orange-300 px-4 py-3 rounded text-center text-sm transition-colors">🔍 Search Google News ↗</a>
+      `;
+      
+      html += '</div>';
+      return html;
+    }
 
-    <script>
-        const STATIC_MODE = !window.location.port;
-        let ALL_DEALS = [];
-        let activeCategory = null;
-
-        // ═══════════════════════════════════════
-        // INTELLIGENCE CATEGORIES
-        // Red Alert = must-examine buy opportunities
-        // ═══════════════════════════════════════
-        const CATEGORIES = [
-            {
-                id: 'red_alert',
-                emoji: '🔴',
-                label: 'RED ALERT',
-                subtitle: 'Must-Examine Targets',
-                border: 'border-red-700',
-                activeBg: 'bg-red-950',
-                textColor: 'text-red-400',
-                dotColor: 'bg-red-500',
-                pulse: true,
-                // Multi-source mentions, exploring alternatives, or confirmed with signals
-                filter: d => {
-                    if (d.deal_status === 'exploring_alternatives') return true;
-                    // Confirmed large-cap deals are buy signals for competitors
-                    if (d.deal_status === 'confirmed' && d.market_cap_b && d.market_cap_b >= 2) return true;
-                    return false;
-                }
-            },
-            {
-                id: 'buy_opportunities',
-                emoji: '🟠',
-                label: 'BUY OPPORTUNITIES',
-                subtitle: 'Rumored & Available',
-                border: 'border-orange-700',
-                activeBg: 'bg-orange-950',
-                textColor: 'text-orange-400',
-                dotColor: 'bg-orange-500',
-                filter: d => d.deal_status === 'rumored'
-            },
-            {
-                id: 'on_radar',
-                emoji: '🟣',
-                label: 'ON THE RADAR',
-                subtitle: 'Potential Targets',
-                border: 'border-purple-700',
-                activeBg: 'bg-purple-950',
-                textColor: 'text-purple-400',
-                dotColor: 'bg-purple-500',
-                filter: d => d.deal_status === 'potential_target'
-            },
-            {
-                id: 'closed_deals',
-                emoji: '✅',
-                label: 'CLOSED DEALS',
-                subtitle: 'Completed Reference',
-                border: 'border-blue-700',
-                activeBg: 'bg-blue-950',
-                textColor: 'text-blue-400',
-                dotColor: 'bg-blue-500',
-                filter: d => d.deal_status === 'completed'
-            },
-            {
-                id: 'all',
-                emoji: '📋',
-                label: 'ALL',
-                subtitle: 'Everything',
-                border: 'border-slate-600',
-                activeBg: 'bg-slate-800',
-                textColor: 'text-slate-300',
-                dotColor: 'bg-slate-400',
-                filter: () => true
-            }
-        ];
-
-        const STATUS_BADGES = {
-            rumored: { bg: 'bg-yellow-500/15', text: 'text-yellow-400', label: 'Rumored' },
-            confirmed: { bg: 'bg-green-500/15', text: 'text-green-400', label: 'Confirmed' },
-            exploring_alternatives: { bg: 'bg-red-500/15', text: 'text-red-400', label: 'Exploring Alternatives' },
-            completed: { bg: 'bg-blue-500/15', text: 'text-blue-400', label: 'Completed' },
-            potential_target: { bg: 'bg-purple-500/15', text: 'text-purple-400', label: 'Potential Target' },
-        };
-
-        const DEAL_TYPES = {
-            acquisition: '🤝 Acquisition', merger: '🔄 Merger',
-            divestiture: '✂️ Divestiture', ipo_spinoff: '🚀 IPO/Spin-off',
-        };
-
-        // ═══════════════════════════════════════
-        // DATA
-        // ═══════════════════════════════════════
-        async function loadAllData() {
-            try {
-                const url = STATIC_MODE ? 'api/deals.json' : '/api/deals?limit=500';
-                const res = await fetch(url);
-                const data = await res.json();
-                ALL_DEALS = data.deals || [];
-            } catch (e) { console.error('Load error:', e); }
-            document.getElementById('totalCount').textContent = ALL_DEALS.length;
-            populateFilterDropdowns();
-            renderCategories();
-            renderDeals();
-        }
-
-        function populateFilterDropdowns() {
-            const subsectors = [...new Set(ALL_DEALS.map(d => d.subsector).filter(Boolean))].sort();
-            const sources = [...new Set(ALL_DEALS.map(d => d.source_name).filter(Boolean))].sort();
-
-            const subSel = document.getElementById('subsectorFilter');
-            const curSub = subSel.value;
-            subSel.innerHTML = '<option value="">All Subsectors</option>' + subsectors.map(s =>
-                `<option value="${s}">${s} (${ALL_DEALS.filter(d=>d.subsector===s).length})</option>`).join('');
-            subSel.value = curSub;
-
-            const srcSel = document.getElementById('sourceFilter');
-            const curSrc = srcSel.value;
-            srcSel.innerHTML = '<option value="">All Sources</option>' + sources.map(s =>
-                `<option value="${s}">${s} (${ALL_DEALS.filter(d=>d.source_name===s).length})</option>`).join('');
-            srcSel.value = curSrc;
-        }
-
-        // ═══════════════════════════════════════
-        // CATEGORIES
-        // ═══════════════════════════════════════
-        function renderCategories() {
-            const grid = document.getElementById('categoryGrid');
-            grid.innerHTML = CATEGORIES.map(cat => {
-                const count = ALL_DEALS.filter(cat.filter).length;
-                const isActive = activeCategory === cat.id;
-                return `
-                <div class="cat-card rounded-xl p-3 border ${isActive ? cat.border + ' ' + cat.activeBg : 'border-slate-800 bg-slate-900'} ${cat.textColor}"
-                     onclick="selectCategory('${cat.id}')">
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold uppercase tracking-wide">${cat.emoji} ${cat.label}</span>
-                        <div class="flex items-center gap-1.5">
-                            ${cat.pulse && count > 0 ? '<span class="pulse-dot w-1.5 h-1.5 rounded-full ' + cat.dotColor + ' inline-block"></span>' : ''}
-                            <span class="text-lg font-extrabold">${count}</span>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-500 mt-0.5">${cat.subtitle}</p>
-                </div>`;
-            }).join('');
-        }
-
-        function selectCategory(catId) {
-            activeCategory = activeCategory === catId ? null : catId;
-            renderCategories();
-            renderDeals();
-        }
-
-        // ═══════════════════════════════════════
-        // FILTERING + RENDERING
-        // ═══════════════════════════════════════
-        function getFilteredDeals() {
-            const q = document.getElementById('searchInput').value.trim().toLowerCase();
-            const subsector = document.getElementById('subsectorFilter').value;
-            const source = document.getElementById('sourceFilter').value;
-            const minCap = parseFloat(document.getElementById('minCap').value) || null;
-            const maxCap = parseFloat(document.getElementById('maxCap').value) || null;
-            const sort = document.getElementById('sortSelect').value;
-
-            const catFilter = activeCategory ? CATEGORIES.find(c => c.id === activeCategory)?.filter : null;
-
-            let filtered = ALL_DEALS.filter(d => {
-                if (catFilter && !catFilter(d)) return false;
-                if (q && !`${d.name} ${d.ticker||''} ${d.subsector||''} ${d.summary||''} ${d.source_name||''}`.toLowerCase().includes(q)) return false;
-                if (subsector && d.subsector !== subsector) return false;
-                if (source && d.source_name !== source) return false;
-                if (minCap && (!d.market_cap_b || d.market_cap_b < minCap)) return false;
-                if (maxCap && (!d.market_cap_b || d.market_cap_b > maxCap)) return false;
-                return true;
-            });
-
-            filtered.sort((a, b) => {
-                if (sort === 'name') return (a.name||'').localeCompare(b.name||'');
-                if (sort === 'market_cap_b') return (b.market_cap_b||0) - (a.market_cap_b||0);
-                return (b[sort]||'').localeCompare(a[sort]||'');
-            });
-
-            return filtered;
-        }
-
-        function renderDeals() {
-            const deals = getFilteredDeals();
-            const cat = activeCategory ? CATEGORIES.find(c => c.id === activeCategory) : null;
-
-            document.getElementById('activeCategory').textContent = cat ? `${cat.emoji} ${cat.label}` : 'All Targets';
-            document.getElementById('resultCount').textContent = `· ${deals.length} result${deals.length !== 1 ? 's' : ''}`;
-
-            const hasFilters = activeCategory || document.getElementById('searchInput').value || document.getElementById('subsectorFilter').value || document.getElementById('sourceFilter').value || document.getElementById('minCap').value || document.getElementById('maxCap').value;
-            document.getElementById('clearFilters').classList.toggle('hidden', !hasFilters);
-
-            if (deals.length === 0) {
-                document.getElementById('dealRows').innerHTML = '<div class="px-6 py-12 text-center text-slate-500">No targets match your criteria</div>';
-                return;
-            }
-
-            document.getElementById('dealRows').innerHTML = deals.map(deal => {
-                const st = STATUS_BADGES[deal.deal_status] || STATUS_BADGES.rumored;
-                const dt = DEAL_TYPES[deal.deal_type] || deal.deal_type || '';
-                const capStr = deal.market_cap_b ? `<span class="text-emerald-400 font-semibold">$${deal.market_cap_b}B</span>` : '';
-                const ticker = deal.ticker ? `<span class="bg-slate-700/80 text-slate-300 text-xs px-1.5 py-0.5 rounded font-mono">${esc(deal.ticker)}</span>` : '';
-                const updated = deal.last_updated ? new Date(deal.last_updated).toLocaleDateString('en-US', {month:'short',day:'numeric'}) : '';
-                const source = deal.source_name || '';
-
-                return `
-                <div class="deal-row px-5 py-3 flex items-start gap-4">
-                    <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 flex-wrap mb-0.5">
-                            <span class="font-semibold text-sm leading-tight">${esc(deal.name)}</span>
-                            ${ticker} ${capStr}
-                        </div>
-                        <p class="text-xs text-slate-400 truncate-2 mb-1.5">${esc(deal.summary||'')}</p>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <span class="${st.bg} ${st.text} text-xs px-2 py-0.5 rounded-full font-medium">${st.label}</span>
-                            <span class="text-xs text-slate-500">${dt}</span>
-                            ${deal.subsector ? `<span class="bg-emerald-500/10 text-emerald-500 text-xs px-2 py-0.5 rounded-full">${esc(deal.subsector)}</span>` : ''}
-                        </div>
-                    </div>
-                    <div class="flex-shrink-0 text-right space-y-1 pt-0.5">
-                        <div class="text-xs text-slate-600">${source}</div>
-                        <div class="text-xs text-slate-600">${updated}</div>
-                        ${deal.source_url ? `<a href="${esc(deal.source_url)}" target="_blank" rel="noopener" class="text-xs text-emerald-600 hover:text-emerald-400">View source ↗</a>` : ''}
-                    </div>
-                </div>`;
-            }).join('');
-        }
-
-        function resetAll() {
-            activeCategory = null;
-            document.getElementById('searchInput').value = '';
-            document.getElementById('subsectorFilter').value = '';
-            document.getElementById('sourceFilter').value = '';
-            document.getElementById('minCap').value = '';
-            document.getElementById('maxCap').value = '';
-            document.getElementById('sortSelect').value = 'last_updated';
-            renderCategories();
-            renderDeals();
-        }
-
-        function esc(s) { const d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
-
-        // ═══════════════════════════════════════
-        // REFRESH
-        // ═══════════════════════════════════════
-        async function refreshData() {
-            const btn = document.getElementById('refreshBtn');
-            const icon = document.getElementById('refreshIcon');
-            const txt = document.getElementById('refreshText');
-            btn.disabled = true; icon.classList.add('spinner'); txt.textContent = 'Refreshing...';
-            try {
-                if (!STATIC_MODE) { await fetch('/api/refresh',{method:'POST'}); await new Promise(r=>setTimeout(r,8000)); }
-                await loadAllData();
-                document.getElementById('lastUpdate').textContent = 'Updated ' + new Date().toLocaleTimeString();
-            } catch(e) { console.error(e); }
-            finally { btn.disabled = false; icon.classList.remove('spinner'); txt.textContent = 'Refresh'; }
-        }
-
-        // ═══════════════════════════════════════
-        // LISTENERS
-        // ═══════════════════════════════════════
-        let debounce;
-        document.getElementById('searchInput').addEventListener('input', () => { clearTimeout(debounce); debounce = setTimeout(renderDeals, 300); });
-        ['subsectorFilter','sourceFilter','sortSelect'].forEach(id => document.getElementById(id).addEventListener('change', renderDeals));
-        ['minCap','maxCap'].forEach(id => document.getElementById(id).addEventListener('change', renderDeals));
-
-        if (!STATIC_MODE) setInterval(loadAllData, 60000);
-        loadAllData();
-    </script>
+    // Start
+    init();
+  </script>
 </body>
 </html>
