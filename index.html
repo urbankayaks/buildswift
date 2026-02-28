@@ -254,63 +254,49 @@
             return matchCount >= 3 ? matchCount : 0;
         }
 
-        // Grouping Logic
+        // Grouping Logic — handles both old flat format and new company-first format
         function groupByCompany(deals) {
             const groups = [];
-            const used = new Set();
 
-            for (let i = 0; i < deals.length; i++) {
-                if (used.has(i)) continue;
-                
-                const current = deals[i];
-                const group = { sources: [current], name: current.name };
-                used.add(i);
-
-                // Find similar companies
-                for (let j = i + 1; j < deals.length; j++) {
-                    if (used.has(j)) continue;
-                    if (nameSimilarity(current.name, deals[j].name) > 0) {
-                        group.sources.push(deals[j]);
-                        used.add(j);
-                    }
+            for (const deal of deals) {
+                // New format: deal already has embedded sources array from company_builder
+                if (deal.sources && Array.isArray(deal.sources) && deal.sources.length > 0 && deal.sources[0].source_name) {
+                    groups.push({
+                        name: deal.name,
+                        ticker: deal.ticker,
+                        market_cap_b: deal.market_cap_b,
+                        subsector: deal.subsector,
+                        deal_status: deal.deal_status,
+                        deal_type: deal.deal_type,
+                        sources: deal.sources,
+                        source_count: deal.signal_count || deal.sources.length,
+                        acquisition_score: deal.acquisition_score || 0,
+                        latest_update: deal.last_updated
+                    });
+                    continue;
                 }
 
-                // Aggregate properties
-                const names = group.sources.map(s => s.name);
-                const nameCounts = {};
-                names.forEach(n => nameCounts[n] = (nameCounts[n] || 0) + 1);
-                group.name = Object.entries(nameCounts).sort((a, b) => b[1] - a[1])[0][0];
-
-                const tickers = group.sources.filter(s => s.ticker);
-                group.ticker = tickers.length > 0 ? tickers[0].ticker : null;
-
-                const caps = group.sources.map(s => s.market_cap_b).filter(c => c);
-                group.market_cap_b = caps.length > 0 ? Math.max(...caps) : null;
-
-                const subsectors = group.sources.map(s => s.subsector).filter(s => s);
-                if (subsectors.length > 0) {
-                    const subCounts = {};
-                    subsectors.forEach(s => subCounts[s] = (subCounts[s] || 0) + 1);
-                    group.subsector = Object.entries(subCounts).sort((a, b) => b[1] - a[1])[0][0];
-                } else {
-                    group.subsector = null;
-                }
-
-                // Status priority: confirmed > exploring_alternatives > rumored > potential_target > completed
-                const statusPriority = { confirmed: 0, exploring_alternatives: 1, rumored: 2, potential_target: 3, completed: 4 };
-                const statuses = group.sources.map(s => s.deal_status);
-                group.deal_status = statuses.sort((a, b) => 
-                    (statusPriority[a] ?? 5) - (statusPriority[b] ?? 5)
-                )[0];
-
-                // Get deal type from highest priority status
-                const primarySource = group.sources.find(s => s.deal_status === group.deal_status) || group.sources[0];
-                group.deal_type = primarySource?.deal_type || 'acquisition';
-
-                group.source_count = group.sources.length;
-
-                const updates = group.sources.map(s => s.last_updated).filter(d => d);
-                group.latest_update = updates.length > 0 ? new Date(Math.max(...updates.map(d => new Date(d)))).toISOString() : null;
+                // Fallback: old flat format — treat each deal as its own "company"
+                groups.push({
+                    name: deal.name,
+                    ticker: deal.ticker,
+                    market_cap_b: deal.market_cap_b,
+                    subsector: deal.subsector,
+                    deal_status: deal.deal_status,
+                    deal_type: deal.deal_type,
+                    sources: [{
+                        source_name: deal.source_name,
+                        source_url: deal.source_url,
+                        summary: deal.summary,
+                        deal_status: deal.deal_status,
+                        deal_type: deal.deal_type,
+                        date: deal.last_updated
+                    }],
+                    source_count: 1,
+                    acquisition_score: 0,
+                    latest_update: deal.last_updated
+                });
+            }
 
                 groups.push(group);
             }
