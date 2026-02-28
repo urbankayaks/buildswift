@@ -1,21 +1,23 @@
 {
-  "total": 50,
+  "total": 118,
   "by_status": {
     "confirmed": 2,
-    "rumored": 6,
-    "potential_target": 42
+    "rumored": 8,
+    "potential_target": 106,
+    "unknown": 2
   },
   "by_subsector": {
-    "Diagnostics": 7,
-    "Medical Devices": 15,
-    "Cardiovascular": 9,
-    "Surgical": 7,
-    "Digital Health": 5,
-    "Dental": 2,
+    "Diagnostics": 13,
+    "Medical Devices": 51,
+    "Cardiovascular": 15,
+    "Surgical": 13,
+    "Digital Health": 6,
+    "Dental": 3,
     "Healthcare Services": 1,
-    "Implants & Ortho": 3,
-    "Medical Imaging": 1
+    "Medical Imaging": 6,
+    "Implants & Ortho": 7,
+    "Ophthalmology": 3
   },
   "signals_total": 212,
-  "companies_with_signals": 11
+  "companies_with_signals": 13
 }
