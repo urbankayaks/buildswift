@@ -15,11 +15,13 @@
         .status-rumored { background: rgba(250, 204, 21, 0.15); color: #facc15; border-color: rgba(250, 204, 21, 0.3); }
         .status-potential_target { background: rgba(168, 85, 247, 0.15); color: #a855f7; border-color: rgba(168, 85, 247, 0.3); }
         .status-completed { background: rgba(96, 165, 250, 0.15); color: #60a5fa; border-color: rgba(96, 165, 250, 0.3); }
+        .card-private { border-left: 4px solid #a855f7 !important; } /* Purple accent for private companies */
         .card-highlight { border-color: #34d399; box-shadow: 0 4px 20px rgba(52, 211, 153, 0.15); }
         .fade-in { animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .spinner { border: 2px solid rgba(255,255,255,0.1); border-top-color: #34d399; border-radius: 50%; width: 16px; height: 16px; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .sparkline { display: inline-block; vertical-align: middle; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-200 min-h-screen">
@@ -39,7 +41,7 @@
         <!-- View 1: Company List -->
         <div id="listView">
             <!-- Category Tiles -->
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
                 <button data-category="red_alert" class="category-tile p-3 rounded-lg border border-slate-800 bg-slate-900 hover:border-red-400/50 transition-all text-left">
                     <div class="text-xl mb-1">🔴</div>
                     <div class="text-xs text-slate-400 uppercase tracking-wide">Red Alert</div>
@@ -54,6 +56,11 @@
                     <div class="text-xl mb-1">🟣</div>
                     <div class="text-xs text-slate-400 uppercase tracking-wide">On The Radar</div>
                     <div class="text-2xl font-bold text-purple-400" data-count="on_the_radar">0</div>
+                </button>
+                <button data-category="private" class="category-tile p-3 rounded-lg border border-slate-800 bg-slate-900 hover:border-purple-400/50 transition-all text-left">
+                    <div class="text-xl mb-1">🏥</div>
+                    <div class="text-xs text-slate-400 uppercase tracking-wide">Private</div>
+                    <div class="text-2xl font-bold text-purple-400" data-count="private">0</div>
                 </button>
                 <button data-category="closed" class="category-tile p-3 rounded-lg border border-slate-800 bg-slate-900 hover:border-blue-400/50 transition-all text-left">
                     <div class="text-xl mb-1">✅</div>
@@ -187,11 +194,13 @@
         // Configuration
         const STATIC_MODE = !window.location.port;
         const API_URL = STATIC_MODE ? 'api/deals.json' : '/api/deals?limit=500';
+        const SPARKLINE_URL = STATIC_MODE ? 'api/sparklines.json' : '/api/sparklines.json';
         const REFRESH_INTERVAL = STATIC_MODE ? null : 60000;
 
         // State
         let allCompanies = [];
         let filteredCompanies = [];
+        let sparklineData = {};
         let currentCategory = 'all';
         let currentFilters = { search: '', subsector: '', source: '', minCap: '', maxCap: '', sort: 'latest' };
         let scrollPosition = 0;
@@ -254,6 +263,33 @@
             return matchCount >= 3 ? matchCount : 0;
         }
 
+        // Sparkline rendering
+        function renderSparkline(prices, isUp) {
+            if (!prices || prices.length < 2) return '';
+            const w = 120, h = 40, pad = 2;
+            const min = Math.min(...prices);
+            const max = Math.max(...prices);
+            const range = max - min || 1;
+            const points = prices.map((p, i) => {
+                const x = pad + (i / (prices.length - 1)) * (w - pad * 2);
+                const y = pad + (1 - (p - min) / range) * (h - pad * 2);
+                return `${x.toFixed(1)},${y.toFixed(1)}`;
+            }).join(' ');
+            const color = isUp ? '#10b981' : '#ef4444';
+            // Gradient fill under the line
+            const areaPoints = `${pad},${h - pad} ${points} ${w - pad},${h - pad}`;
+            return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" class="sparkline">
+                <defs>
+                    <linearGradient id="grad-${isUp ? 'up' : 'down'}" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" style="stop-color:${color};stop-opacity:0.2" />
+                        <stop offset="100%" style="stop-color:${color};stop-opacity:0" />
+                    </linearGradient>
+                </defs>
+                <polygon points="${areaPoints}" fill="url(#grad-${isUp ? 'up' : 'down'})" />
+                <polyline points="${points}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>`;
+        }
+
         // Grouping Logic — handles both old flat format and new company-first format
         function groupByCompany(deals) {
             const groups = [];
@@ -307,9 +343,20 @@
             refreshBtn.innerHTML = '<div class="spinner"></div> Loading...';
             
             try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
+                // Load companies and sparklines in parallel
+                const [dealsRes, sparkRes] = await Promise.all([
+                    fetch(API_URL),
+                    fetch(SPARKLINE_URL).catch(() => ({ ok: false }))
+                ]);
+                
+                const data = await dealsRes.json();
                 allCompanies = groupByCompany(data.deals || []);
+                
+                // Load sparkline data if available
+                if (sparkRes.ok) {
+                    sparklineData = await sparkRes.json();
+                }
+                
                 populateFilters();
                 applyFilters();
             } catch (error) {
@@ -333,13 +380,17 @@
         }
 
         function getCategoryCounts() {
-            const counts = { red_alert: 0, buy_opportunities: 0, on_the_radar: 0, closed: 0, all: allCompanies.length };
+            const counts = { red_alert: 0, buy_opportunities: 0, on_the_radar: 0, private: 0, closed: 0, all: allCompanies.length };
             
             allCompanies.forEach(c => {
+                const isPrivate = c.ticker ? false : (c.is_private || !c.market_cap_b);
+                
                 if (c.deal_status === 'confirmed' || c.deal_status === 'exploring_alternatives') counts.red_alert++;
                 else if (c.deal_status === 'rumored') counts.buy_opportunities++;
                 else if (c.deal_status === 'potential_target') counts.on_the_radar++;
                 else if (c.deal_status === 'completed') counts.closed++;
+                
+                if (isPrivate) counts.private++;
             });
 
             return counts;
@@ -356,6 +407,11 @@
                     result = result.filter(c => c.deal_status === 'rumored');
                 } else if (currentCategory === 'on_the_radar') {
                     result = result.filter(c => c.deal_status === 'potential_target');
+                } else if (currentCategory === 'private') {
+                    result = result.filter(c => {
+                        const isPrivate = c.ticker ? false : (c.is_private || !c.market_cap_b);
+                        return isPrivate;
+                    });
                 } else if (currentCategory === 'closed') {
                     result = result.filter(c => c.deal_status === 'completed');
                 }
@@ -406,6 +462,7 @@
             document.querySelector('[data-count="red_alert"]').textContent = counts.red_alert;
             document.querySelector('[data-count="buy_opportunities"]').textContent = counts.buy_opportunities;
             document.querySelector('[data-count="on_the_radar"]').textContent = counts.on_the_radar;
+            document.querySelector('[data-count="private"]').textContent = counts.private;
             document.querySelector('[data-count="closed"]').textContent = counts.closed;
             document.querySelector('[data-count="all"]').textContent = counts.all;
             companyCount.textContent = filteredCompanies.length;
@@ -422,13 +479,60 @@
             companyGrid.innerHTML = filteredCompanies.map((company, idx) => {
                 const hasSignals = company.source_count > 0;
                 const isHighScore = company.acquisition_score > 5;
+                const isPrivate = company.ticker ? false : (company.is_private || !company.market_cap_b);
+                
+                // Determine card classes
+                let cardClass = 'company-card bg-slate-900 border rounded-xl p-4 cursor-pointer hover:-translate-y-1 transition-all duration-200 fade-in';
+                if (hasSignals) {
+                    cardClass += ' border-l-4 border-l-emerald-500';
+                } else if (isPrivate) {
+                    cardClass += ' border-l-4 border-l-purple-500';
+                } else {
+                    cardClass += ' border-slate-800';
+                }
+                if (isHighScore) {
+                    cardClass += ' shadow-lg shadow-emerald-500/10';
+                }
                 
                 // Format market cap
                 const marketCapFormatted = company.market_cap_b ? `$${company.market_cap_b.toFixed(1)}B` : '';
                 
-                // Format stock price and change
+                // Format stock price and change (only for public companies)
                 let stockPriceHTML = '';
-                if (company.stock_price) {
+                let fiftyTwoWeekHTML = '';
+                let revenueHTML = '';
+                let sparklineHTML = '';
+                
+                // Check for sparkline data from sparklines.json
+                const sparkline = company.ticker && sparklineData[company.ticker];
+                
+                if (!isPrivate && sparkline) {
+                    // Use data from sparklines.json
+                    const prices = sparkline.prices || [];
+                    const current = sparkline.current;
+                    const changePct = sparkline.change_pct;
+                    const isUp = current > (prices[0] || current);
+                    
+                    const changeSymbol = changePct > 0 ? '▲' : '▼';
+                    const changeColor = changePct > 0 ? 'text-green-400' : 'text-red-400';
+                    
+                    stockPriceHTML = `
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="text-white font-bold">$${current.toFixed(2)}</span>
+                                <span class="${changeColor}">${changeSymbol} ${Math.abs(changePct).toFixed(1)}%</span>
+                            </div>
+                            ${renderSparkline(prices, isUp)}
+                        </div>
+                    `;
+                    if (marketCapFormatted) {
+                        stockPriceHTML += `<div class="text-slate-400 text-sm mt-1">MCap: ${marketCapFormatted}</div>`;
+                    }
+                    // 52-week range
+                    fiftyTwoWeekHTML = (sparkline.low_52w && sparkline.high_52w) 
+                        ? `<div class="text-xs text-slate-500">52W: $${sparkline.low_52w.toFixed(2)} — $${sparkline.high_52w.toFixed(2)}</div>` 
+                        : '';
+                } else if (!isPrivate && company.stock_price) {
                     const changeSymbol = company.price_change_pct > 0 ? '▲' : '▼';
                     const changeColor = company.price_change_pct > 0 ? 'text-green-400' : 'text-red-400';
                     stockPriceHTML = `
@@ -436,18 +540,25 @@
                         <span class="${changeColor}">${changeSymbol} ${Math.abs(company.price_change_pct).toFixed(1)}%</span>
                         ${marketCapFormatted ? `<span class="text-slate-400 ml-auto">MCap: ${marketCapFormatted}</span>` : ''}
                     `;
+                    // 52-week range for public companies
+                    fiftyTwoWeekHTML = (company.fifty_two_week_low && company.fifty_two_week_high) 
+                        ? `<div class="text-xs text-slate-500">52W: $${company.fifty_two_week_low.toFixed(2)} — $${company.fifty_two_week_high.toFixed(2)}</div>` 
+                        : '';
+                } else if (isPrivate) {
+                    // Private company: show FDA clearances instead of stock price
+                    const fdaClearances = company.fda_clearances || 0;
+                    stockPriceHTML = fdaClearances > 0 
+                        ? `<span class="text-purple-400">🏥 ${fdaClearances} FDA clearances</span>`
+                        : `<span class="text-purple-400">🔬 Private medtech</span>`;
+                    if (company.latest_fda_date) {
+                        stockPriceHTML += `<span class="text-slate-400 ml-2">Latest: ${company.latest_fda_date}</span>`;
+                    }
                 } else if (marketCapFormatted) {
                     stockPriceHTML = `<span class="text-slate-300">${marketCapFormatted}</span>`;
                 }
                 
-                // Format 52-week range
-                const fiftyTwoWeekHTML = (company.fifty_two_week_low && company.fifty_two_week_high) 
-                    ? `<div class="text-xs text-slate-500">52W: $${company.fifty_two_week_low.toFixed(2)} — $${company.fifty_two_week_high.toFixed(2)}</div>` 
-                    : '';
-                
-                // Format revenue and employees
-                let revenueHTML = '';
-                if (company.revenue_m !== undefined && company.revenue_m !== null || company.employees) {
+                // Format revenue and employees (hide for private companies)
+                if (!isPrivate && (company.revenue_m !== undefined && company.revenue_m !== null || company.employees)) {
                     const revFormatted = (company.revenue_m !== undefined && company.revenue_m !== null) ? `$${company.revenue_m.toFixed(1)}M` : '';
                     const growthColor = company.revenue_growth_pct > 0 ? 'text-green-400' : 'text-red-400';
                     const growthFormatted = company.revenue_growth_pct 
@@ -475,13 +586,24 @@
                     ? `<div class="text-xs text-slate-400 mt-2 line-clamp-2">${company.description}</div>` 
                     : '';
                 
+                // Format patents (show if patent_count > 0)
+                const patentCount = company.patent_count || 0;
+                const patentHTML = patentCount > 0 
+                    ? `<div class="text-xs mt-2"><span class="text-amber-400">📜 ${patentCount} patent${patentCount > 1 ? 's' : ''}</span></div>` 
+                    : '';
+                
                 // Signal indicator
                 const signalHTML = hasSignals 
                     ? `<span class="text-orange-400 text-sm font-medium">🔥 ${company.source_count} signal${company.source_count > 1 ? 's' : ''}</span>` 
                     : '';
                 
+                // Ticker or PRIVATE badge
+                const tickerHTML = company.ticker 
+                    ? `<span class="font-mono text-emerald-400">${company.ticker}</span>`
+                    : (isPrivate ? `<span class="px-2 py-0.5 rounded text-xs font-medium bg-purple-900/50 text-purple-400">PRIVATE</span>` : '');
+                
                 return `
-                    <div class="company-card bg-slate-900 border rounded-xl p-4 cursor-pointer hover:-translate-y-1 transition-all duration-200 fade-in ${hasSignals ? 'border-l-4 border-l-emerald-500' : 'border-slate-800'} ${isHighScore ? 'shadow-lg shadow-emerald-500/10' : ''}" data-idx="${idx}">
+                    <div class="${cardClass}" data-idx="${idx}">
                         <div class="flex items-start justify-between mb-2">
                             <span class="px-2 py-0.5 rounded text-xs font-medium border ${getStatusClass(company.deal_status)}">${company.deal_status.replace('_', ' ')}</span>
                             ${signalHTML}
@@ -489,14 +611,15 @@
                         
                         <h3 class="font-bold text-lg text-white mt-2">${company.name}</h3>
                         <div class="text-sm text-slate-400 mt-0.5">
-                            ${company.ticker ? `<span class="font-mono text-emerald-400">${company.ticker}</span>` : ''}
-                            ${company.ticker && company.subsector ? ' · ' : ''}
+                            ${tickerHTML}
+                            ${(company.ticker || isPrivate) && company.subsector ? ' · ' : ''}
                             ${company.subsector || ''}
                         </div>
                         
                         ${stockPriceHTML ? `<div class="flex items-center gap-2 mt-3">${stockPriceHTML}</div>` : ''}
                         ${fiftyTwoWeekHTML}
                         ${revenueHTML}
+                        ${patentHTML}
                         ${hqHTML}
                         ${descHTML}
                     </div>
@@ -554,8 +677,16 @@
             // Header
             document.getElementById('detailName').textContent = company.name;
             const tickerEl = document.getElementById('detailTicker');
-            tickerEl.textContent = company.ticker || '';
-            tickerEl.classList.toggle('hidden', !company.ticker);
+            const isPrivate = company.ticker ? false : (company.is_private || !company.market_cap_b);
+            
+            if (isPrivate) {
+                tickerEl.textContent = 'PRIVATE';
+                tickerEl.className = 'px-3 py-1 bg-purple-900/50 rounded text-sm font-medium text-purple-400';
+            } else {
+                tickerEl.textContent = company.ticker || '';
+                tickerEl.className = 'px-3 py-1 bg-slate-800 rounded text-sm font-mono text-emerald-400';
+            }
+            tickerEl.classList.toggle('hidden', !company.ticker && !isPrivate);
 
             const capEl = document.getElementById('detailCap');
             capEl.textContent = company.market_cap_b ? formatCap(company.market_cap_b) : '';
@@ -813,7 +944,10 @@
             const content = document.getElementById('financialsContent');
             const section = document.getElementById('section-financials');
             
-            if (!company.ticker) {
+            const isPrivate = company.ticker ? false : (company.is_private || !company.market_cap_b);
+            
+            // Hide financials section for private companies
+            if (isPrivate || !company.ticker) {
                 section.classList.add('hidden');
                 return;
             }

@@ -1,23 +1,29 @@
 {
-  "total": 118,
+  "total": 432,
   "by_status": {
-    "confirmed": 2,
-    "rumored": 8,
-    "potential_target": 106,
-    "unknown": 2
+    "confirmed": 4,
+    "rumored": 18,
+    "potential_target": 410
   },
   "by_subsector": {
-    "Diagnostics": 13,
-    "Medical Devices": 51,
-    "Cardiovascular": 15,
-    "Surgical": 13,
-    "Digital Health": 6,
-    "Dental": 3,
+    "Diagnostics": 32,
+    "Medical Devices": 246,
+    "Surgical": 20,
+    "Medical Imaging": 14,
+    "Cardiovascular": 23,
+    "Digital Health": 22,
+    "Women's Health": 6,
+    "Dental": 15,
+    "ENT": 6,
+    "Radiation Therapy": 7,
+    "Ophthalmology": 10,
     "Healthcare Services": 1,
-    "Medical Imaging": 6,
-    "Implants & Ortho": 7,
-    "Ophthalmology": 3
+    "Wound Care": 9,
+    "Implants & Ortho": 14,
+    "Neuromodulation": 4,
+    "Infusion": 2,
+    "Ophthalmic": 1
   },
-  "signals_total": 211,
-  "companies_with_signals": 13
+  "signals_total": 210,
+  "companies_with_signals": 26
 }
