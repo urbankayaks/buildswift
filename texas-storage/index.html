@@ -27,6 +27,12 @@
   </div>
 
   <div class="card">
+    <h3>Target Property Candidates (for contractor storage)</h3>
+    <div class="row"><input id="targetCounty" placeholder="Filter county" /><button onclick="renderTargets()">Filter</button></div>
+    <table><thead><tr><th>Score</th><th>Parcel</th><th>County</th><th>City</th><th>Zip</th><th>Lot SF</th><th>Bldg SF</th><th>Class</th><th>Owner</th></tr></thead><tbody id="targets"></tbody></table>
+  </div>
+
+  <div class="card">
     <h3>Searchable Index</h3>
     <div class="row">
       <input id="q" placeholder="Search" />
@@ -38,13 +44,15 @@
   </div>
 
 <script>
-let counties=[]; let records=[];
+let counties=[]; let records=[]; let targets=[];
 async function init(){
-  [counties,records]=await Promise.all([
+  [counties,records,targets]=await Promise.all([
     fetch('./data/counties.json').then(r=>r.json()),
-    fetch('./data/records.json').then(r=>r.json())
+    fetch('./data/records.json').then(r=>r.json()),
+    fetch('./data/targets.json').then(r=>r.json())
   ]);
   renderCounties();
+  renderTargets();
   runSearch();
   drawMap();
 }
@@ -55,6 +63,14 @@ function renderCounties(){
   const el=document.getElementById('counties');
   el.innerHTML='';
   rows.slice(0,254).forEach(r=>el.innerHTML += `<tr><td>${r.county}</td><td>${r.score}</td><td>${r.contractor_count}</td><td>${r.hoa_count}</td><td>${r.parcel_count}</td></tr>`);
+}
+
+function renderTargets(){
+  const c=(document.getElementById('targetCounty').value||'').toUpperCase();
+  const rows=targets.filter(r=>!c || (r.county||'').toUpperCase().includes(c)).slice(0,300);
+  const el=document.getElementById('targets');
+  el.innerHTML='';
+  rows.forEach(r=>el.innerHTML += `<tr><td>${r.target_score||''}</td><td>${r.parcel_id||''}</td><td>${r.county||''}</td><td>${r.city||''}</td><td>${r.zip||''}</td><td>${r.lot_size||''}</td><td>${r.bldg_area||''}</td><td>${r.class_desc||''}</td><td>${r.owner_name||''}</td></tr>`);
 }
 
 function runSearch(){
@@ -73,17 +89,17 @@ function runSearch(){
 }
 
 async function drawMap(){
-  const geo=await fetch('https://raw.githubusercontent.com/codeforgermany/click_that_hood/main/public/data/texas-counties.geojson').then(r=>r.json());
+  const geo=await fetch('https://raw.githubusercontent.com/Cincome/tx.geojson/master/counties/tx_counties.geojson').then(r=>r.json());
   const by=Object.fromEntries(counties.map(r=>[r.county,r]));
   const locations=[],z=[],text=[];
   for(const f of geo.features){
-    const n=String(f.properties.name||'');
-    const u=n.toUpperCase();
+    const countyLabel=String(f.properties.COUNTY||'');
+    const u=countyLabel.toUpperCase().replace(/ COUNTY$/,'').trim();
     const r=by[u]||{score:0,contractor_count:0,hoa_count:0,parcel_count:0};
-    locations.push(n); z.push(r.score||0);
+    locations.push(countyLabel); z.push(r.score||0);
     text.push(`${u}<br>Score:${r.score||0}<br>Contractors:${r.contractor_count||0}<br>HOAs:${r.hoa_count||0}<br>Parcels:${r.parcel_count||0}`);
   }
-  Plotly.newPlot('map',[{type:'choroplethmapbox',geojson:geo,locations,z,featureidkey:'properties.name',text,hovertemplate:'%{text}<extra></extra>',colorscale:'YlOrRd'}],{mapbox:{style:'carto-darkmatter',center:{lat:31,lon:-99.3},zoom:4.8},margin:{l:0,r:0,t:0,b:0},paper_bgcolor:'#10161f',font:{color:'#e6edf3'}});
+  Plotly.newPlot('map',[{type:'choroplethmapbox',geojson:geo,locations,z,featureidkey:'properties.COUNTY',text,hovertemplate:'%{text}<extra></extra>',colorscale:'YlOrRd'}],{mapbox:{style:'carto-darkmatter',center:{lat:31,lon:-99.3},zoom:4.8},margin:{l:0,r:0,t:0,b:0},paper_bgcolor:'#10161f',font:{color:'#e6edf3'}});
 }
 
 init();
