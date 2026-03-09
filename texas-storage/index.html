@@ -22,6 +22,10 @@
     <h3>Dataset Snapshot</h3>
     <div id="snapshot">Loading…</div>
   </div>
+  <div class="card">
+    <h3>Top 10 Counties Right Now</h3>
+    <table><thead><tr><th>#</th><th>County</th><th>Score</th><th>Contractors</th><th>HOAs</th><th>Parcels</th></tr></thead><tbody id="topCounties"></tbody></table>
+  </div>
   <div class="card"><h3>County Map</h3><div id="map"></div></div>
 
   <div class="card">
@@ -57,6 +61,7 @@ async function init(){
     fetch('./data/metadata.json').then(r=>r.json())
   ]);
   renderSnapshot();
+  renderTopCounties();
   renderCounties();
   renderTargets();
   runSearch();
@@ -67,6 +72,13 @@ function renderSnapshot(){
   const el=document.getElementById('snapshot');
   const ts=(metadata.generated_at_utc||'').replace('T',' ').replace('+00:00',' UTC');
   el.innerHTML=`Updated: <b>${ts}</b><br>Counties: <b>${metadata.county_count||0}</b> · Records: <b>${metadata.record_count||0}</b> · Targets: <b>${metadata.target_count||0}</b>`;
+}
+
+function renderTopCounties(){
+  const top=counties.slice(0,10);
+  const el=document.getElementById('topCounties');
+  el.innerHTML='';
+  top.forEach((r,i)=>el.innerHTML += `<tr><td>${i+1}</td><td>${r.county}</td><td>${r.score}</td><td>${r.contractor_count}</td><td>${r.hoa_count}</td><td>${r.parcel_count}</td></tr>`);
 }
 
 function renderCounties(){
