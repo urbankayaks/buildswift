@@ -23,6 +23,10 @@
     <div id="snapshot">Loading…</div>
   </div>
   <div class="card">
+    <h3>Revenue Signals (Live)</h3>
+    <div id="signals">Loading…</div>
+  </div>
+  <div class="card">
     <h3>Top 10 Counties Right Now</h3>
     <table><thead><tr><th>#</th><th>County</th><th>Score</th><th>Contractors</th><th>HOAs</th><th>Parcels</th></tr></thead><tbody id="topCounties"></tbody></table>
   </div>
@@ -61,6 +65,7 @@ async function init(){
     fetch('./data/metadata.json').then(r=>r.json())
   ]);
   renderSnapshot();
+  renderSignals();
   renderTopCounties();
   renderCounties();
   renderTargets();
@@ -72,6 +77,32 @@ function renderSnapshot(){
   const el=document.getElementById('snapshot');
   const ts=(metadata.generated_at_utc||'').replace('T',' ').replace('+00:00',' UTC');
   el.innerHTML=`Updated: <b>${ts}</b><br>Counties: <b>${metadata.county_count||0}</b> · Records: <b>${metadata.record_count||0}</b> · Targets: <b>${metadata.target_count||0}</b>`;
+}
+
+function renderSignals(){
+  const el=document.getElementById('signals');
+  if(!counties.length){ el.textContent='No county data yet.'; return; }
+
+  const top = counties[0] || {};
+  const totalContractors = counties.reduce((s,r)=>s+(Number(r.contractor_count)||0),0);
+  const totalHoas = counties.reduce((s,r)=>s+(Number(r.hoa_count)||0),0);
+  const avgScore = (counties.reduce((s,r)=>s+(Number(r.score)||0),0) / counties.length) || 0;
+
+  const typeCounts = records.reduce((acc,r)=>{
+    const k=(r.record_type||'unknown').toLowerCase();
+    acc[k]=(acc[k]||0)+1;
+    return acc;
+  },{});
+
+  const topTypes = Object.entries(typeCounts)
+    .sort((a,b)=>b[1]-a[1])
+    .slice(0,3)
+    .map(([k,v])=>`${k}: <b>${v.toLocaleString()}</b>`)
+    .join(' · ');
+
+  el.innerHTML = `Top county now: <b>${top.county||'N/A'}</b> (score <b>${top.score||0}</b>)<br>`+
+    `Statewide avg score: <b>${avgScore.toFixed(1)}</b> · Contractors indexed: <b>${totalContractors.toLocaleString()}</b> · HOAs indexed: <b>${totalHoas.toLocaleString()}</b><br>`+
+    `Record mix: ${topTypes}`;
 }
 
 function renderTopCounties(){
