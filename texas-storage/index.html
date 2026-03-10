@@ -29,6 +29,7 @@
   <div class="card">
     <h3>Build Progress</h3>
     <div id="buildProgress">Loading…</div>
+    <div id="freshnessPanel" style="margin-top:8px"></div>
   </div>
   <div class="card">
     <h3>Revenue Signals (Live)</h3>
@@ -64,13 +65,14 @@
   </div>
 
 <script>
-let counties=[]; let records=[]; let targets=[]; let metadata={};
+let counties=[]; let records=[]; let targets=[]; let metadata={}; let freshness=[];
 async function init(){
-  [counties,records,targets,metadata]=await Promise.all([
+  [counties,records,targets,metadata,freshness]=await Promise.all([
     fetch('./data/counties.json').then(r=>r.json()),
     fetch('./data/records.json').then(r=>r.json()),
     fetch('./data/targets.json').then(r=>r.json()),
-    fetch('./data/metadata.json').then(r=>r.json())
+    fetch('./data/metadata.json').then(r=>r.json()),
+    fetch('./data/county-freshness.json').then(r=>r.json()).catch(()=>[])
   ]);
   renderSnapshot();
   renderBuildProgress();
@@ -94,8 +96,15 @@ function renderBuildProgress(){
   const notes = metadata.progress_notes || 'county leaderboard + target inventory synced';
   const next = metadata.next_milestone || 'expand target pipeline from 1,000 to 5,000 parcels';
   const commit = metadata.source_commit || 'n/a';
-  const freshness = (metadata.generated_at_utc || 'n/a').replace('T',' ').replace('+00:00',' UTC');
-  el.innerHTML = `Stage: <b>${stage}</b><br>Progress: ${notes}<br>Next ship target: ${next}<br>Data freshness: <b>${freshness}</b><br>Source commit: <code>${commit}</code>`;
+  const freshStamp = (metadata.generated_at_utc || 'n/a').replace('T',' ').replace('+00:00',' UTC');
+  el.innerHTML = `Stage: <b>${stage}</b><br>Progress: ${notes}<br>Next ship target: ${next}<br>Data freshness: <b>${freshStamp}</b><br>Source commit: <code>${commit}</code>`;
+
+  const panel = document.getElementById('freshnessPanel');
+  if(!freshness.length){ panel.innerHTML=''; return; }
+  const verified = freshness.filter(x=>x.status==='verified').sort((a,b)=>String(b.last_updated_utc).localeCompare(String(a.last_updated_utc))).slice(0,8);
+  panel.innerHTML = '<div style="font-size:12px;opacity:.9"><b>County freshness telemetry</b> (verified): ' +
+    verified.map(x=>`${x.county} · ${(x.last_updated_utc||'').replace('T',' ').replace('+00:00',' UTC')}`).join(' | ') +
+    '</div>';
 }
 
 function renderSignals(){
