@@ -94,7 +94,8 @@ function renderBuildProgress(){
   const notes = metadata.progress_notes || 'county leaderboard + target inventory synced';
   const next = metadata.next_milestone || 'expand target pipeline from 1,000 to 5,000 parcels';
   const commit = metadata.source_commit || 'n/a';
-  el.innerHTML = `Stage: <b>${stage}</b><br>Progress: ${notes}<br>Next ship target: ${next}<br>Source commit: <code>${commit}</code>`;
+  const freshness = (metadata.generated_at_utc || 'n/a').replace('T',' ').replace('+00:00',' UTC');
+  el.innerHTML = `Stage: <b>${stage}</b><br>Progress: ${notes}<br>Next ship target: ${next}<br>Data freshness: <b>${freshness}</b><br>Source commit: <code>${commit}</code>`;
 }
 
 function renderSignals(){
