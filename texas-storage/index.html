@@ -32,6 +32,10 @@
     <div id="freshnessPanel" style="margin-top:8px"></div>
   </div>
   <div class="card">
+    <h3>Deploy Log (Live)</h3>
+    <div id="deployLog">Loading…</div>
+  </div>
+  <div class="card">
     <h3>Revenue Signals (Live)</h3>
     <div id="signals">Loading…</div>
   </div>
@@ -76,6 +80,7 @@ async function init(){
   ]);
   renderSnapshot();
   renderBuildProgress();
+  renderDeployLog();
   renderSignals();
   renderTopCounties();
   renderCounties();
@@ -105,6 +110,21 @@ function renderBuildProgress(){
   panel.innerHTML = '<div style="font-size:12px;opacity:.9"><b>County freshness telemetry</b> (verified): ' +
     verified.map(x=>`${x.county} · ${(x.last_updated_utc||'').replace('T',' ').replace('+00:00',' UTC')}`).join(' | ') +
     '</div>';
+}
+
+function renderDeployLog(){
+  const el=document.getElementById('deployLog');
+  const updates = Array.isArray(metadata.deploy_updates) ? metadata.deploy_updates : [];
+  if(!updates.length){
+    el.innerHTML = '<span style="opacity:.85">No deploy entries yet. Next push will populate this stream.</span>';
+    return;
+  }
+  el.innerHTML = updates.slice(0,5).map((u,i)=>{
+    const when = (u.when_utc||'').replace('T',' ').replace('+00:00',' UTC');
+    const note = u.note || 'update shipped';
+    const commit = u.commit ? ` <code>${u.commit}</code>` : '';
+    return `${i+1}. <b>${when}</b> — ${note}${commit}`;
+  }).join('<br>');
 }
 
 function renderSignals(){
