@@ -14,6 +14,10 @@
     th{background:#111821}
     .card{background:#10161f;border:1px solid #2f3b47;padding:12px;border-radius:10px;margin-top:10px}
     #map{height:560px;width:100%}
+    .badge{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700}
+    .badge-hot{background:#123d2c;color:#63f2ab;border:1px solid #1f6d4e}
+    .badge-warm{background:#3b2f12;color:#ffd67a;border:1px solid #7a5d1d}
+    .badge-cold{background:#3b1f1f;color:#ff9d9d;border:1px solid #7a2e2e}
   </style>
 </head>
 <body>
@@ -32,14 +36,14 @@
   </div>
   <div class="card">
     <h3>Top 10 Counties Right Now</h3>
-    <table><thead><tr><th>#</th><th>County</th><th>Score</th><th>Contractors</th><th>HOAs</th><th>Parcels</th></tr></thead><tbody id="topCounties"></tbody></table>
+    <table><thead><tr><th>#</th><th>County</th><th>Score</th><th>Contractors</th><th>HOAs</th><th>Parcels</th><th>Coverage</th></tr></thead><tbody id="topCounties"></tbody></table>
   </div>
   <div class="card"><h3>County Map</h3><div id="map"></div></div>
 
   <div class="card">
     <h3>Counties</h3>
     <div class="row"><input id="county" placeholder="Filter county" /><button onclick="renderCounties()">Filter</button></div>
-    <table><thead><tr><th>County</th><th>Score</th><th>Contractors</th><th>HOAs</th><th>Parcels</th></tr></thead><tbody id="counties"></tbody></table>
+    <table><thead><tr><th>County</th><th>Score</th><th>Contractors</th><th>HOAs</th><th>Parcels</th><th>Coverage</th></tr></thead><tbody id="counties"></tbody></table>
   </div>
 
   <div class="card">
@@ -115,16 +119,34 @@ function renderSignals(){
     .map(([k,v])=>`${k}: <b>${v.toLocaleString()}</b>`)
     .join(' · ');
 
+  const hotCount = counties.filter(r=>coverageBadge(r).includes('hot')).length;
+  const warmCount = counties.filter(r=>coverageBadge(r).includes('warming')).length;
+
   el.innerHTML = `Top county now: <b>${top.county||'N/A'}</b> (score <b>${top.score||0}</b>)<br>`+
     `Statewide avg score: <b>${avgScore.toFixed(1)}</b> · Contractors indexed: <b>${totalContractors.toLocaleString()}</b> · HOAs indexed: <b>${totalHoas.toLocaleString()}</b><br>`+
+    `Coverage tiers: <b>${hotCount}</b> hot · <b>${warmCount}</b> warming · <b>${counties.length-hotCount-warmCount}</b> needs data<br>`+
     `Record mix: ${topTypes}`;
+}
+
+function coverageBadge(row){
+  const contractorCount = Number(row.contractor_count)||0;
+  const hoaCount = Number(row.hoa_count)||0;
+  const parcelCount = Number(row.parcel_count)||0;
+  const score = Number(row.score)||0;
+
+  const dataRich = contractorCount >= 500 && hoaCount >= 50 && parcelCount >= 300;
+  const partiallyReady = contractorCount >= 200 && (hoaCount >= 20 || parcelCount >= 100);
+
+  if(dataRich && score >= 40) return '<span class="badge badge-hot">hot</span>';
+  if(partiallyReady) return '<span class="badge badge-warm">warming</span>';
+  return '<span class="badge badge-cold">needs data</span>';
 }
 
 function renderTopCounties(){
   const top=counties.slice(0,10);
   const el=document.getElementById('topCounties');
   el.innerHTML='';
-  top.forEach((r,i)=>el.innerHTML += `<tr><td>${i+1}</td><td>${r.county}</td><td>${r.score}</td><td>${r.contractor_count}</td><td>${r.hoa_count}</td><td>${r.parcel_count}</td></tr>`);
+  top.forEach((r,i)=>el.innerHTML += `<tr><td>${i+1}</td><td>${r.county}</td><td>${r.score}</td><td>${r.contractor_count}</td><td>${r.hoa_count}</td><td>${r.parcel_count}</td><td>${coverageBadge(r)}</td></tr>`);
 }
 
 function renderCounties(){
@@ -132,7 +154,7 @@ function renderCounties(){
   const rows=counties.filter(x=>!f||x.county.includes(f));
   const el=document.getElementById('counties');
   el.innerHTML='';
-  rows.slice(0,254).forEach(r=>el.innerHTML += `<tr><td>${r.county}</td><td>${r.score}</td><td>${r.contractor_count}</td><td>${r.hoa_count}</td><td>${r.parcel_count}</td></tr>`);
+  rows.slice(0,254).forEach(r=>el.innerHTML += `<tr><td>${r.county}</td><td>${r.score}</td><td>${r.contractor_count}</td><td>${r.hoa_count}</td><td>${r.parcel_count}</td><td>${coverageBadge(r)}</td></tr>`);
 }
 
 function renderTargets(){
