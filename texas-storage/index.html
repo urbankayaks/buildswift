@@ -41,6 +41,11 @@
     <div id="signals">Loading…</div>
   </div>
   <div class="card">
+    <h3>Top-25 County Acquisition Queue</h3>
+    <table><thead><tr><th>#</th><th>County</th><th>Score</th><th>Est. Monthly Leads</th><th>Est. Monthly Revenue @ 8% close / $350 MRR</th></tr></thead><tbody id="acqQueue"></tbody></table>
+  </div>
+
+  <div class="card">
     <h3>Top 10 Counties Right Now</h3>
     <table><thead><tr><th>#</th><th>County</th><th>Score</th><th>Contractors</th><th>HOAs</th><th>Parcels</th><th>Coverage</th></tr></thead><tbody id="topCounties"></tbody></table>
   </div>
@@ -84,6 +89,7 @@ async function init(){
   renderDeployLog();
   renderSignals();
   renderTopCounties();
+  renderAcquisitionQueue();
   renderCounties();
   renderTargets();
   runSearch();
@@ -178,6 +184,22 @@ function coverageBadge(row){
   if(dataRich && score >= 40) return '<span class="badge badge-hot">hot</span>';
   if(partiallyReady) return '<span class="badge badge-warm">warming</span>';
   return '<span class="badge badge-cold">needs data</span>';
+}
+
+
+function renderAcquisitionQueue(){
+  const rows = counties.slice(0,25);
+  const el=document.getElementById('acqQueue');
+  if(!el) return;
+  el.innerHTML='';
+  rows.forEach((r,i)=>{
+    const contractors = Number(r.contractor_count)||0;
+    const hoas = Number(r.hoa_count)||0;
+    const parcels = Number(r.parcel_count)||0;
+    const monthlyLeads = Math.round((contractors*0.015)+(hoas*0.03)+(parcels*0.004));
+    const estRevenue = Math.round(monthlyLeads*0.08*350);
+    el.innerHTML += `<tr><td>${i+1}</td><td>${r.county}</td><td>${r.score}</td><td>${monthlyLeads.toLocaleString()}</td><td>$${estRevenue.toLocaleString()}</td></tr>`;
+  });
 }
 
 function renderTopCounties(){
