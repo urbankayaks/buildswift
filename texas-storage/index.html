@@ -116,7 +116,13 @@ function renderBuildProgress(){
   const currentTargets = Number(metadata.target_count || targets.length || 0);
   const pct = targetGoal > 0 ? Math.min(100, (currentTargets / targetGoal) * 100) : 0;
   const remaining = Math.max(0, targetGoal - currentTargets);
-  pipelineEl.innerHTML = `Pipeline throughput: <b>${currentTargets.toLocaleString()}</b> / ${targetGoal.toLocaleString()} targets (${pct.toFixed(1)}%) · Remaining: <b>${remaining.toLocaleString()}</b>`;
+  const updates = Array.isArray(metadata.deploy_updates) ? metadata.deploy_updates : [];
+  const nowMs = Date.now();
+  const pushes24h = updates.filter(u=>{
+    const t = Date.parse(u.when_utc || '');
+    return Number.isFinite(t) && (nowMs - t) <= 24*60*60*1000;
+  }).length;
+  pipelineEl.innerHTML = `Pipeline throughput: <b>${currentTargets.toLocaleString()}</b> / ${targetGoal.toLocaleString()} targets (${pct.toFixed(1)}%) · Remaining: <b>${remaining.toLocaleString()}</b> · 24h deploy pushes: <b>${pushes24h}</b>`;
 
   const panel = document.getElementById('freshnessPanel');
   if(!freshness.length){ panel.innerHTML=''; return; }
