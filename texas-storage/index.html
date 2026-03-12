@@ -122,7 +122,12 @@ function renderBuildProgress(){
     const t = Date.parse(u.when_utc || '');
     return Number.isFinite(t) && (nowMs - t) <= 24*60*60*1000;
   }).length;
-  pipelineEl.innerHTML = `Pipeline throughput: <b>${currentTargets.toLocaleString()}</b> / ${targetGoal.toLocaleString()} targets (${pct.toFixed(1)}%) · Remaining: <b>${remaining.toLocaleString()}</b> · 24h deploy pushes: <b>${pushes24h}</b>`;
+  const latestDeployMs = Date.parse((updates[0] && updates[0].when_utc) || metadata.generated_at_utc || '');
+  const minsSinceDeploy = Number.isFinite(latestDeployMs) ? Math.max(0, Math.round((nowMs - latestDeployMs) / 60000)) : null;
+  const staleFlag = minsSinceDeploy !== null && minsSinceDeploy > 45
+    ? ' · <span style="color:#ff9d9d">stale-risk: refresh due</span>'
+    : ' · <span style="color:#63f2ab">cadence healthy</span>';
+  pipelineEl.innerHTML = `Pipeline throughput: <b>${currentTargets.toLocaleString()}</b> / ${targetGoal.toLocaleString()} targets (${pct.toFixed(1)}%) · Remaining: <b>${remaining.toLocaleString()}</b> · 24h deploy pushes: <b>${pushes24h}</b> · Minutes since last deploy: <b>${minsSinceDeploy===null?'n/a':minsSinceDeploy}</b>${staleFlag}`;
 
   const panel = document.getElementById('freshnessPanel');
   if(!freshness.length){ panel.innerHTML=''; return; }
