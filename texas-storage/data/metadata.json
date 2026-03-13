@@ -1,13 +1,18 @@
 {
-  "generated_at_utc": "2026-03-13T06:59:03+00:00",
+  "generated_at_utc": "2026-03-13T10:02:54+00:00",
   "county_count": 254,
   "record_count": 26745,
   "target_count": 1000,
   "build_stage": "statewide indexing + revenue concentration telemetry",
-  "progress_notes": "shipped median top-25 monthly revenue metric and top-5 lead-flow share so county expansion concentration risk is visible in one glance",
+  "progress_notes": "shipped top-5 projected lead-flow share KPI so county expansion concentration risk is visible alongside revenue telemetry",
   "next_milestone": "expand target inventory from 1,000 to 2,500 and publish county-level delta gains for Harris, Dallas, Travis",
-  "source_commit": "88ef9ef",
+  "source_commit": "deadb6f",
   "deploy_updates": [
+    {
+      "when_utc": "2026-03-13T10:02:54+00:00",
+      "note": "30-min momentum deploy: added top-5 county projected lead-flow share KPI and refreshed 05:02 CT heartbeat visibility on build log",
+      "commit": "deadb6f"
+    },
     {
       "when_utc": "2026-03-13T06:59:03+00:00",
       "note": "30-min momentum deploy: added median top-25 county monthly revenue + top-5 lead-share concentration metric in Revenue Signals",
