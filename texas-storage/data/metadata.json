@@ -1,13 +1,18 @@
 {
-  "generated_at_utc": "2026-03-13T18:16:00+00:00",
+  "generated_at_utc": "2026-03-13T20:18:28+00:00",
   "county_count": 254,
   "record_count": 26745,
   "target_count": 1000,
-  "build_stage": "statewide indexing + readiness-ratio telemetry",
-  "progress_notes": "shipped statewide data-ready county ratio KPI (hot+warming %) so coverage quality trend is visible alongside revenue concentration telemetry",
+  "build_stage": "statewide indexing + cadence guardrails + expansion runway telemetry",
+  "progress_notes": "refreshed 30-min execution heartbeat and added explicit expansion-runway telemetry so on-site progress shows current target gap to 2,500 and 5,000 goals",
   "next_milestone": "expand target inventory from 1,000 to 2,500 and publish county-level delta gains for Harris, Dallas, Travis",
   "source_commit": "main@latest",
   "deploy_updates": [
+    {
+      "when_utc": "2026-03-13T20:18:28+00:00",
+      "note": "30-min momentum deploy: refreshed 15:17 CT heartbeat, tightened cadence visibility, and published explicit target-gap runway (to 2,500 / 5,000) for Texas storage expansion tracking",
+      "commit": "main@latest"
+    },
     {
       "when_utc": "2026-03-13T13:05:26+00:00",
       "note": "30-min momentum deploy: added statewide data-ready county ratio KPI (hot+warming %) to Revenue Signals and refreshed 08:05 CT heartbeat visibility on build log",
