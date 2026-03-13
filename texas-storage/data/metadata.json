@@ -6,12 +6,12 @@
   "build_stage": "statewide indexing + deploy cadence SLA telemetry",
   "progress_notes": "shipped cadence SLA countdown (target min + next deploy ETA) so buildswift.co surfaces delivery timing risk in real time",
   "next_milestone": "expand target inventory from 1,000 to 2,500 and publish county-level delta gains for Harris, Dallas, Travis",
-  "source_commit": "c06a515",
+  "source_commit": "7a00ff5",
   "deploy_updates": [
     {
       "when_utc": "2026-03-13T00:56:17+00:00",
       "note": "30-min momentum deploy: added cadence SLA target + next deploy ETA countdown to pipeline metrics",
-      "commit": "PENDING"
+      "commit": "7a00ff5"
     },
     {
       "when_utc": "2026-03-12T21:53:19+00:00",
