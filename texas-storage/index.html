@@ -183,6 +183,8 @@ function renderSignals(){
 
   const hotCount = counties.filter(r=>coverageBadge(r).includes('hot')).length;
   const warmCount = counties.filter(r=>coverageBadge(r).includes('warming')).length;
+  const readyCount = hotCount + warmCount;
+  const readyRatio = counties.length ? (readyCount / counties.length) * 100 : 0;
   const top25 = counties.slice(0,25);
   const queueMonthlyRevenue = top25.reduce((sum,r)=>{
     const contractors = Number(r.contractor_count)||0;
@@ -270,6 +272,7 @@ function renderSignals(){
   el.innerHTML = `Top county now: <b>${top.county||'N/A'}</b> (score <b>${top.score||0}</b>)<br>`+
     `Statewide avg score: <b>${avgScore.toFixed(1)}</b> · Contractors indexed: <b>${totalContractors.toLocaleString()}</b> · HOAs indexed: <b>${totalHoas.toLocaleString()}</b><br>`+
     `Coverage tiers: <b>${hotCount}</b> hot · <b>${warmCount}</b> warming · <b>${counties.length-hotCount-warmCount}</b> needs data<br>`+
+    `Data-ready county ratio (hot+warming): <b>${readyRatio.toFixed(1)}%</b> (${readyCount}/${counties.length})<br>`+
     `Top-25 queue estimated revenue: <b>$${queueMonthlyRevenue.toLocaleString()}/mo</b> · <b>$${queueArr.toLocaleString()}/yr</b><br>`+
     `Top 5 counties by est. monthly revenue: ${top5Revenue}<br>`+
     `Revenue concentration (Top 5 of Top 25): <b>${top5Concentration.toFixed(1)}%</b> ($${top5Sum.toLocaleString()}/mo)<br>`+
