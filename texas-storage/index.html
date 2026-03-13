@@ -245,6 +245,28 @@ function renderSignals(){
     .map(x=>`${x.county} (${x.monthlyLeads.toLocaleString()} leads/mo)`)
     .join(' · ');
 
+  const top5LeadTotal = top5LeadRows.reduce((sum,r)=>sum + (Number(r.monthlyLeads)||0),0);
+  const top25LeadTotal = top25.reduce((sum,r)=>{
+    const contractors = Number(r.contractor_count)||0;
+    const hoas = Number(r.hoa_count)||0;
+    const parcels = Number(r.parcel_count)||0;
+    return sum + Math.round((contractors*0.015)+(hoas*0.03)+(parcels*0.004));
+  },0);
+  const top5LeadShare = top25LeadTotal > 0 ? (top5LeadTotal / top25LeadTotal) * 100 : 0;
+
+  const monthlyRevenueSeries = top25
+    .map(r=>{
+      const contractors = Number(r.contractor_count)||0;
+      const hoas = Number(r.hoa_count)||0;
+      const parcels = Number(r.parcel_count)||0;
+      const monthlyLeads = Math.round((contractors*0.015)+(hoas*0.03)+(parcels*0.004));
+      return Math.round(monthlyLeads*0.08*350);
+    })
+    .sort((a,b)=>a-b);
+  const medianTop25Revenue = monthlyRevenueSeries.length
+    ? monthlyRevenueSeries[Math.floor(monthlyRevenueSeries.length/2)]
+    : 0;
+
   el.innerHTML = `Top county now: <b>${top.county||'N/A'}</b> (score <b>${top.score||0}</b>)<br>`+
     `Statewide avg score: <b>${avgScore.toFixed(1)}</b> · Contractors indexed: <b>${totalContractors.toLocaleString()}</b> · HOAs indexed: <b>${totalHoas.toLocaleString()}</b><br>`+
     `Coverage tiers: <b>${hotCount}</b> hot · <b>${warmCount}</b> warming · <b>${counties.length-hotCount-warmCount}</b> needs data<br>`+
@@ -254,6 +276,8 @@ function renderSignals(){
     `Revenue concentration (Top 10 of Top 25): <b>${top10Concentration.toFixed(1)}%</b> ($${top10Sum.toLocaleString()}/mo) · Long-tail opportunity: <b>$${longTailMonthlyRevenue.toLocaleString()}/mo</b><br>`+
     `Avg est. monthly revenue per Top-25 county: <b>$${avgTop25Revenue.toLocaleString()}</b><br>`+
     `Top 5 counties by est. monthly lead flow: ${top5Leads}<br>`+
+    `Lead concentration (Top 5 of Top 25): <b>${top5LeadShare.toFixed(1)}%</b> (${top5LeadTotal.toLocaleString()} / ${top25LeadTotal.toLocaleString()} leads/mo)<br>`+
+    `Median est. monthly revenue (Top-25 county): <b>$${medianTop25Revenue.toLocaleString()}</b><br>`+
     `Record mix: ${topTypes}`;
 }
 
