@@ -6,12 +6,12 @@
   "build_stage": "statewide indexing + readiness-ratio telemetry",
   "progress_notes": "shipped statewide data-ready county ratio KPI (hot+warming %) so coverage quality trend is visible alongside revenue concentration telemetry",
   "next_milestone": "expand target inventory from 1,000 to 2,500 and publish county-level delta gains for Harris, Dallas, Travis",
-  "source_commit": "4928338",
+  "source_commit": "b8f65a6",
   "deploy_updates": [
     {
       "when_utc": "2026-03-13T13:05:26+00:00",
       "note": "30-min momentum deploy: added statewide data-ready county ratio KPI (hot+warming %) to Revenue Signals and refreshed 08:05 CT heartbeat visibility on build log",
-      "commit": "4928338"
+      "commit": "b8f65a6"
     },
     {
       "when_utc": "2026-03-13T10:02:54+00:00",
