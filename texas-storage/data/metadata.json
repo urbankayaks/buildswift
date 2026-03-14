@@ -1,13 +1,18 @@
 {
-  "generated_at_utc": "2026-03-14T08:24:00+00:00",
+  "generated_at_utc": "2026-03-14T10:25:00+00:00",
   "county_count": 254,
   "record_count": 26745,
   "target_count": 1000,
-  "build_stage": "statewide indexing + cadence guardrails + expansion runway telemetry",
-  "progress_notes": "shipped freshness verification coverage KPI (verified counties + %) to keep expansion telemetry accountable, refreshed 03:24 CT heartbeat, and kept Harris/Dallas/Travis ingest sprint pressure visible toward 2,500 targets",
+  "build_stage": "statewide indexing + cadence guardrails + freshness recency telemetry",
+  "progress_notes": "shipped freshness recency KPI (median verified age + stale>24h count), refreshed 05:25 CT heartbeat, and kept Harris/Dallas/Travis ingest sprint pressure visible toward 2,500 targets",
   "next_milestone": "expand target inventory from 1,000 to 2,500 and publish county-level delta gains for Harris, Dallas, Travis with verified freshness ratio trend",
   "source_commit": "main@latest",
   "deploy_updates": [
+    {
+      "when_utc": "2026-03-14T10:25:00+00:00",
+      "note": "30-min momentum deploy: added freshness recency KPI (median verified age + stale>24h count) to Build Progress, refreshed 05:25 CT heartbeat, and kept Harris/Dallas/Travis ingest sprint visible toward 2,500 targets.",
+      "commit": "main@latest"
+    },
     {
       "when_utc": "2026-03-14T08:24:00+00:00",
       "note": "30-min momentum deploy: added verified-county freshness coverage KPI (count + %) to Build Progress, refreshed 03:24 CT heartbeat, and kept Harris/Dallas/Travis ingest sprint visible toward 2,500 targets.",
