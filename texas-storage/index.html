@@ -138,8 +138,12 @@ function renderBuildProgress(){
 
   const panel = document.getElementById('freshnessPanel');
   if(!freshness.length){ panel.innerHTML=''; return; }
-  const verified = freshness.filter(x=>x.status==='verified').sort((a,b)=>String(b.last_updated_utc).localeCompare(String(a.last_updated_utc))).slice(0,8);
-  panel.innerHTML = '<div style="font-size:12px;opacity:.9"><b>County freshness telemetry</b> (verified): ' +
+  const verifiedAll = freshness.filter(x=>x.status==='verified');
+  const verified = verifiedAll.sort((a,b)=>String(b.last_updated_utc).localeCompare(String(a.last_updated_utc))).slice(0,8);
+  const verifiedPct = freshness.length ? (verifiedAll.length / freshness.length) * 100 : 0;
+  panel.innerHTML = '<div style="font-size:12px;opacity:.9"><b>County freshness telemetry</b>: ' +
+    `<b>${verifiedAll.length}</b>/<b>${freshness.length}</b> counties verified (${verifiedPct.toFixed(1)}%)<br>` +
+    '<span style="opacity:.9">Latest verified:</span> ' +
     verified.map(x=>`${x.county} · ${(x.last_updated_utc||'').replace('T',' ').replace('+00:00',' UTC')}`).join(' | ') +
     '</div>';
 }
