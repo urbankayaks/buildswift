@@ -150,20 +150,29 @@ function renderBuildProgress(){
   const medianAgeHours = ageHours.length ? ageHours[Math.floor(ageHours.length/2)] : null;
   const stale24h = ageHours.filter(h=>h > 24).length;
   const stale24hPct = verifiedAll.length ? (stale24h / verifiedAll.length) * 100 : 0;
-  const staleQueue = verifiedAll
+  const critical96h = ageHours.filter(h=>h > 96).length;
+  const critical96hPct = verifiedAll.length ? (critical96h / verifiedAll.length) * 100 : 0;
+  const staleQueueRows = verifiedAll
     .map(x=>({county:x.county, t:Date.parse(x.last_updated_utc||'')}))
     .filter(x=>Number.isFinite(x.t))
     .map(x=>({county:x.county, ageH:(now - x.t)/3600000}))
     .filter(x=>x.ageH > 24)
-    .sort((a,b)=>b.ageH-a.ageH)
+    .sort((a,b)=>b.ageH-a.ageH);
+  const staleQueue = staleQueueRows
+    .slice(0,5)
+    .map(x=>`${x.county} (${x.ageH.toFixed(1)}h)`)
+    .join(' | ');
+  const criticalQueue = staleQueueRows
+    .filter(x=>x.ageH > 96)
     .slice(0,5)
     .map(x=>`${x.county} (${x.ageH.toFixed(1)}h)`)
     .join(' | ');
   panel.innerHTML = '<div style="font-size:12px;opacity:.9"><b>County freshness telemetry</b>: ' +
-    `<b>${verifiedAll.length}</b>/<b>${freshness.length}</b> counties verified (${verifiedPct.toFixed(1)}%) · Median verified age: <b>${medianAgeHours===null?'n/a':medianAgeHours.toFixed(1)+'h'}</b> · Stale >24h: <b>${stale24h}</b> (<b>${stale24hPct.toFixed(1)}%</b>)<br>` +
+    `<b>${verifiedAll.length}</b>/<b>${freshness.length}</b> counties verified (${verifiedPct.toFixed(1)}%) · Median verified age: <b>${medianAgeHours===null?'n/a':medianAgeHours.toFixed(1)+'h'}</b> · Stale >24h: <b>${stale24h}</b> (<b>${stale24hPct.toFixed(1)}%</b>) · Critical >96h: <b>${critical96h}</b> (<b>${critical96hPct.toFixed(1)}%</b>)<br>` +
     '<span style="opacity:.9">Latest verified:</span> ' +
     verified.map(x=>`${x.county} · ${(x.last_updated_utc||'').replace('T',' ').replace('+00:00',' UTC')}`).join(' | ') +
     (staleQueue ? `<br><span style="opacity:.9">SLA breach queue:</span> ${staleQueue}` : '') +
+    (criticalQueue ? `<br><span style="opacity:.9">Critical stale queue (>96h):</span> ${criticalQueue}` : '') +
     '</div>';
 }
 
