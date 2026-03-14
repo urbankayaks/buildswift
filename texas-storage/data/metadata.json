@@ -1,13 +1,18 @@
 {
-  "generated_at_utc": "2026-03-14T13:37:38+00:00",
+  "generated_at_utc": "2026-03-14T18:39:14+00:00",
   "county_count": 254,
   "record_count": 26745,
   "target_count": 1000,
-  "build_stage": "statewide indexing + cadence guardrails + freshness recency telemetry + county SLA watch",
-  "progress_notes": "refreshed live heartbeat at 08:37 CT, reiterated stale>24h county SLA pressure, and maintained Harris/Dallas/Travis ingest sprint visibility toward 2,500 targets",
-  "next_milestone": "expand target inventory from 1,000 to 2,500 and publish county-level delta gains for Harris, Dallas, Travis with stale>24h counties trending down",
+  "build_stage": "statewide indexing + cadence guardrails + freshness recency telemetry + county SLA breach queue",
+  "progress_notes": "refreshed live heartbeat at 13:39 CT and shipped SLA breach queue (top stale>24h counties) in freshness telemetry to focus Harris/Dallas/Travis ingest cleanup",
+  "next_milestone": "expand target inventory from 1,000 to 2,500 and cut stale>24h county count via Harris/Dallas/Travis refresh sprint",
   "source_commit": "main@latest",
   "deploy_updates": [
+    {
+      "when_utc": "2026-03-14T18:39:14+00:00",
+      "note": "30-min momentum deploy: added SLA breach queue (top stale>24h counties) to County Freshness telemetry, refreshed 13:39 CT heartbeat, and kept Harris/Dallas/Travis ingest cleanup pressure visible.",
+      "commit": "main@latest"
+    },
     {
       "when_utc": "2026-03-14T13:37:38+00:00",
       "note": "30-min momentum deploy: refreshed 08:37 CT heartbeat, published stale-county pressure update for SLA watch continuity, and kept Harris/Dallas/Travis ingest sprint visible toward 2,500 targets.",
