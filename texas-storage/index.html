@@ -149,8 +149,9 @@ function renderBuildProgress(){
     .sort((a,b)=>a-b);
   const medianAgeHours = ageHours.length ? ageHours[Math.floor(ageHours.length/2)] : null;
   const stale24h = ageHours.filter(h=>h > 24).length;
+  const stale24hPct = verifiedAll.length ? (stale24h / verifiedAll.length) * 100 : 0;
   panel.innerHTML = '<div style="font-size:12px;opacity:.9"><b>County freshness telemetry</b>: ' +
-    `<b>${verifiedAll.length}</b>/<b>${freshness.length}</b> counties verified (${verifiedPct.toFixed(1)}%) · Median verified age: <b>${medianAgeHours===null?'n/a':medianAgeHours.toFixed(1)+'h'}</b> · Stale >24h: <b>${stale24h}</b><br>` +
+    `<b>${verifiedAll.length}</b>/<b>${freshness.length}</b> counties verified (${verifiedPct.toFixed(1)}%) · Median verified age: <b>${medianAgeHours===null?'n/a':medianAgeHours.toFixed(1)+'h'}</b> · Stale >24h: <b>${stale24h}</b> (<b>${stale24hPct.toFixed(1)}%</b>)<br>` +
     '<span style="opacity:.9">Latest verified:</span> ' +
     verified.map(x=>`${x.county} · ${(x.last_updated_utc||'').replace('T',' ').replace('+00:00',' UTC')}`).join(' | ') +
     '</div>';
