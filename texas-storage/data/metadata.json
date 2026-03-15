@@ -1,13 +1,18 @@
 {
-  "generated_at_utc": "2026-03-14T23:42:20+00:00",
+  "generated_at_utc": "2026-03-15T01:43:42+00:00",
   "county_count": 254,
   "record_count": 26745,
   "target_count": 1000,
-  "build_stage": "statewide indexing + cadence guardrails + freshness recency telemetry + county SLA breach queue + critical-stale watch",
-  "progress_notes": "refreshed live heartbeat at 18:41 CT, added critical stale (>96h) county watch metric in freshness telemetry, and kept Harris/Dallas/Travis refresh sprint pressure visible.",
+  "build_stage": "statewide indexing + cadence guardrails + freshness recency telemetry + county SLA breach queue + critical-stale watch + cadence compliance monitor",
+  "progress_notes": "refreshed live heartbeat at 20:43 CT and shipped 6h deploy velocity + 24h cadence compliance telemetry in Build Progress to keep execution pressure visible.",
   "next_milestone": "expand target inventory from 1,000 to 2,500 and cut stale>24h county count plus critical>96h backlog via Harris/Dallas/Travis refresh sprint",
   "source_commit": "main@latest",
   "deploy_updates": [
+    {
+      "when_utc": "2026-03-15T01:43:42+00:00",
+      "note": "30-min momentum deploy: refreshed 20:43 CT heartbeat and added 6h deploy velocity plus 24h cadence-compliance KPI to Build Progress so cadence slippage is instantly visible.",
+      "commit": "main@latest"
+    },
     {
       "when_utc": "2026-03-14T23:42:20+00:00",
       "note": "30-min momentum deploy: refreshed 18:41 CT heartbeat, added critical stale (>96h) county watch in County Freshness telemetry, and kept Harris/Dallas/Travis cleanup sprint visible toward the 2,500-target expansion.",
