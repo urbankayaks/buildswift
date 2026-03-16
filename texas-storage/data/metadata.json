@@ -1,13 +1,18 @@
 {
-  "generated_at_utc": "2026-03-15T04:45:19+00:00",
+  "generated_at_utc": "2026-03-16T06:00:00+00:00",
   "county_count": 254,
   "record_count": 26745,
   "target_count": 1000,
-  "build_stage": "statewide indexing + cadence guardrails + freshness recency telemetry + county SLA breach queue + critical-stale watch + cadence compliance monitor + midnight ingest sprint focus",
-  "progress_notes": "refreshed live heartbeat at 23:45 CT and shipped weekend momentum update with explicit midnight ingest sprint focus (Harris/Dallas/Travis) to keep execution pressure visible.",
+  "build_stage": "statewide indexing + cadence guardrails + freshness recency telemetry + county SLA breach queue + critical-stale watch + cadence compliance monitor + priority-county freshness monitor + midnight ingest sprint focus",
+  "progress_notes": "refreshed live heartbeat at 01:00 CT and shipped a priority-county freshness monitor (Harris/Dallas/Travis/Collin/Williamson median + oldest age) in County Freshness telemetry to tighten overnight ingest accountability.",
   "next_milestone": "expand target inventory from 1,000 to 2,500 and cut stale>24h county count plus critical>96h backlog via Harris/Dallas/Travis refresh sprint",
   "source_commit": "main@latest",
   "deploy_updates": [
+    {
+      "when_utc": "2026-03-16T06:00:00+00:00",
+      "note": "30-min momentum deploy: refreshed 01:00 CT heartbeat and added priority-county freshness monitor (Harris/Dallas/Travis/Collin/Williamson median + oldest age) to County Freshness telemetry for overnight ingest accountability.",
+      "commit": "main@latest"
+    },
     {
       "when_utc": "2026-03-15T04:45:19+00:00",
       "note": "30-min momentum deploy: refreshed 23:45 CT heartbeat and published midnight Harris/Dallas/Travis ingest sprint focus in Build Progress to keep overnight execution visible.",

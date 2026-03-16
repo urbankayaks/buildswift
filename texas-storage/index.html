@@ -174,8 +174,24 @@ function renderBuildProgress(){
     .slice(0,5)
     .map(x=>`${x.county} (${x.ageH.toFixed(1)}h)`)
     .join(' | ');
+  const sprintCounties = ['HARRIS','DALLAS','TRAVIS','COLLIN','WILLIAMSON'];
+  const sprintAges = sprintCounties
+    .map(county=>{
+      const row = freshness.find(x=>String(x.county||'').toUpperCase()===county);
+      const t = Date.parse((row && row.last_updated_utc) || '');
+      if(!Number.isFinite(t)) return null;
+      return {county, ageH:(now - t)/3600000};
+    })
+    .filter(Boolean);
+  const sprintMedianAge = sprintAges.length
+    ? sprintAges.map(x=>x.ageH).sort((a,b)=>a-b)[Math.floor(sprintAges.length/2)]
+    : null;
+  const sprintOldest = sprintAges.length
+    ? sprintAges.slice().sort((a,b)=>b.ageH-a.ageH)[0]
+    : null;
   panel.innerHTML = '<div style="font-size:12px;opacity:.9"><b>County freshness telemetry</b>: ' +
     `<b>${verifiedAll.length}</b>/<b>${freshness.length}</b> counties verified (${verifiedPct.toFixed(1)}%) · Median verified age: <b>${medianAgeHours===null?'n/a':medianAgeHours.toFixed(1)+'h'}</b> · Stale >24h: <b>${stale24h}</b> (<b>${stale24hPct.toFixed(1)}%</b>) · Critical >96h: <b>${critical96h}</b> (<b>${critical96hPct.toFixed(1)}%</b>)<br>` +
+    (sprintAges.length ? `<span style="opacity:.9">Priority sprint freshness (Harris/Dallas/Travis/Collin/Williamson):</span> median <b>${sprintMedianAge.toFixed(1)}h</b> · oldest <b>${sprintOldest.county} ${sprintOldest.ageH.toFixed(1)}h</b><br>` : '') +
     '<span style="opacity:.9">Latest verified:</span> ' +
     verified.map(x=>`${x.county} · ${(x.last_updated_utc||'').replace('T',' ').replace('+00:00',' UTC')}`).join(' | ') +
     (staleQueue ? `<br><span style="opacity:.9">SLA breach queue:</span> ${staleQueue}` : '') +
