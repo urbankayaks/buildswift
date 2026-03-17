@@ -1,13 +1,18 @@
 {
-  "generated_at_utc": "2026-03-17T04:07:13+00:00",
+  "generated_at_utc": "2026-03-17T12:12:00+00:00",
   "county_count": 254,
   "record_count": 26745,
-  "target_count": 1000,
-  "build_stage": "statewide indexing + cadence guardrails + freshness recency telemetry + county SLA breach queue + critical-stale watch + cadence compliance monitor + priority-county freshness monitor + sprint critical-risk counter + sprint stale-48h load monitor",
-  "progress_notes": "refreshed heartbeat and shipped sprint stale-48h load monitor (priority counties over 48h stale) beside the >96h critical-risk counter so overnight ingest blockers are visible earlier.",
-  "next_milestone": "drive Harris/Dallas/Travis/Collin/Williamson stale>48h and stale>96h counts down while expanding target inventory from 1,000 to 2,500.",
+  "target_count": 2000,
+  "build_stage": "statewide indexing + target inventory expansion + cadence guardrails + county freshness recency telemetry + county SLA breach queue + critical-stale watch + sprint stale-48h monitor",
+  "progress_notes": "Expanded target property inventory from 1,000 to 2,000 by rebuilding the Texas storage DB/export pipeline and redeploying refreshed statewide data payloads.",
+  "next_milestone": "ingest additional parcel counties (Harris/Dallas/Travis) to push target inventory beyond 2,500 while reducing sprint stale>48h freshness risk.",
   "source_commit": "main@latest",
   "deploy_updates": [
+    {
+      "when_utc": "2026-03-17T12:12:00+00:00",
+      "note": "30-min momentum deploy: rebuilt Texas storage database + static export, doubled target candidate inventory to 2,000, and pushed refreshed county/record/target payloads live.",
+      "commit": "main@latest"
+    },
     {
       "when_utc": "2026-03-17T04:07:13+00:00",
       "note": "30-min momentum deploy: refreshed live heartbeat and added priority sprint stale-48h load monitor (Harris/Dallas/Travis/Collin/Williamson) alongside critical>96h tracking to surface ingest drag sooner.",
